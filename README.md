@@ -20,6 +20,9 @@ Finally, don't forget to turn off optimisation!!
 # Code structure
 
 You will notice I've split the code into several files. I think this will make everything more readable when the project grows more complicated. You should find:
+
 stopwatch.c - this is where the main() function lives and the interrupt service routines.
+
 stopwatch.h - this is for #defines, structs, global variable declarations and function prototypes
+
 functions.c - this is where we write all the functions that will be called in the main loop. Maybe we will split this into more files later if it gets huge.
