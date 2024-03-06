@@ -36,6 +36,35 @@ void green_led()
     }
 }
 
+void update_LCD() {
+    time = 0;
+    for (;;) {
+       if (STATE == CHRONO) {
+           int ms = time % 100;
+           int s = (time / 100) % 60;
+           int min = (time / (100 * 60)) % 60;
+
+           show_digit((min / 10) + '0', 0);
+           show_digit((min % 10) + '0', 1);
+           show_digit((s / 10) + '0', 2);
+           show_digit((s % 10) + '0', 3);
+           show_digit((ms / 10) + '0', 4);
+           show_digit((ms % 10) + '0', 5);
+       }
+    }
+}
+
+void idle() {
+    /**
+     *  Sometimes we might need a process to just do nothing so there is
+     *  a deterministic amount of time spent on the other time sensitive
+     *  processes. If we're really clever, we will implement a way to
+     *  spawn processes while tracking how many are running, and
+     *  change our timing calculations accordingly.
+     */
+    for (;;);
+}
+
 void initialise_process(unsigned int process_index, void (*funct)())
 {
     if (process_index < MAX_PROCESSES)
@@ -104,7 +133,6 @@ void setup()
     WDTCTL = WDTPW | WDTHOLD;       // Stop watchdog timer
 
     // Initialisation
-    current_process = 0;
     PM5CTL0 &= ~LOCKLPM5;           // Disable the GPIO power-on default high-impedance mode
                                     // to activate previously configured port settings
 
@@ -112,6 +140,9 @@ void setup()
     P4DIR |=  0x01;                 // Set P4.6 to output direction
     P1OUT &= ~0x01;                 // Set P1.0 off (Green LED)
     P4OUT &= ~0x01;                 // Set P4.6 off (Red LED)
+    P1DIR &= ~(1 << 3);
+    P1REN |= (1 << 3);
+    P1OUT |= (1 <<3);
 
                                     // Timer A0 (1ms interrupt)
     TA0CCR0 =  1024;                // Count up to 1024
@@ -119,45 +150,5 @@ void setup()
     TA0CTL =  TASSEL_2 + MC_1;      // Timer A using subsystem master clock, SMCLK(1.1 MHz)
                                     // and count UP to create a 1ms interrupt
 
-
-    // Initialisation - Software
-
-    _BIS_SR(GIE);                   // interrupts enabled (we need to do it here so it gets saved to stack)
-
-    initialise_process(0, red_led);
-    initialise_process(1, green_led);
-    run_process(current_process);
-}
-
-#pragma vector=TIMER0_A0_VECTOR
-__interrupt void Timer0_A0 (void)    // Timer0 A0 1ms interrupt service routine
-{
-    // Save first process details...
-    asm(
-            " push.a R10\n"
-            " push.a R9\n"
-            " push.a R8\n"
-            " push.a R7\n"
-            " push.a R6\n"
-            " push.a R5\n"
-            " push.a R4\n"
-            " push.a R3\n"
-            " movx.a sp,&stack_pointer\n"
-        );
-
-    process[current_process].sp = stack_pointer;
-    current_process = (current_process+1) % MAX_PROCESSES;
-    stack_pointer = process[current_process].sp;
-
-    asm(
-            " movx.a &stack_pointer,SP \n"
-            " pop.a R3 \n"
-            " pop.a R4 \n"
-            " pop.a R5 \n"
-            " pop.a R6 \n"
-            " pop.a R7 \n"
-            " pop.a R8 \n"
-            " pop.a R9 \n"
-            " pop.a R10 \n"
-    );
+    _BIS_SR(GIE);                   // interrupts enabled
 }
