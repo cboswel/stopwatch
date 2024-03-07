@@ -6,7 +6,7 @@
 #define RLED 0
 #define GLED 0
 #define START_BUTT 2
-#define MODE_BUTT 6
+#define LAP_BUTT 6
 
 #define LONG unsigned long
 #define WORD unsigned short
@@ -32,6 +32,7 @@ int STATE;
 unsigned int current_process;
 volatile unsigned int time;
 volatile unsigned int r;
+volatile char startPressed, lapPressed, modePressed;
 LONG status;
 LONG stack_pointer;
 LONG program_counter;

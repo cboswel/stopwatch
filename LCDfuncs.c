@@ -6,9 +6,9 @@ void LCD_init() {
      *  Setup code to initialise the LCD. Runs once.
      */
 
-     LCDPCTL0 = 0b1111111111111111; // All reg 1 pins on
-     LCDPCTL1 = 0b1111111111111111; // All reg 2 pins on
-     LCDPCTL2 = 0b1111111111111111; // All reg 3 pins on  #more than necessary - couldn't hurt?
+     LCDPCTL0 = 0b1111111111111111; //
+     LCDPCTL1 = 0b0000011111111111; // Pins L27 - L35 not required, and L30 in fact needs
+     LCDPCTL2 = 0b1111111111110000; // to be deactivated to free up the switch on P2.6
 
      LCDCSSEL0 = 0b1111; // 0 - 3 are COM
 

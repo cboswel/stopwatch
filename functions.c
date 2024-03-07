@@ -146,15 +146,15 @@ void setup()
     P1REN |= (1 << START_BUTT);
     P1OUT |= (1 << START_BUTT);
     P1IE |= (1 << START_BUTT);
-    P1IES |=(1 << START_BUTT);
+    P1IES |= (1 << START_BUTT);
     P1IFG &= ~(1 << START_BUTT);
 
-    P2DIR &= ~(1 << MODE_BUTT);
-    P2REN |= (1 << MODE_BUTT);
-    P2OUT |= (1 << MODE_BUTT);
-    P2IE |= (1 << MODE_BUTT);
-    P2IES |=(1 << MODE_BUTT);
-    P2IFG &= ~(1 << MODE_BUTT);
+    P2DIR &= ~(1 << LAP_BUTT);
+    P2REN |= (1 << LAP_BUTT);
+    P2OUT |= (1 << LAP_BUTT);
+    P2IE |= (1 << LAP_BUTT);
+    P2IES |=(1 << LAP_BUTT);
+    P2IFG &= ~(1 << LAP_BUTT);
 
     SFRRPCR = 0b1111;              // Reset pin control register. Resistor used, Pullup, Falling Edge, NMI mode.
     // NMI = Non-Maskable Interrupt. Means this interrupt is unaffected by 'general interrupt enable' GIE.

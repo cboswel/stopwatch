@@ -19,19 +19,33 @@ __no_operation();
 #pragma vector=PORT1_VECTOR
 __interrupt void Port_1(void)
 {
+    _disable_interrupts();
+    P1IES ^= (1 << START_BUTT);
+    startPressed ^= 1;
     P1IFG &= ~(1 << START_BUTT);
+    _enable_interrupts();
 }
 
 #pragma vector=PORT2_VECTOR
 __interrupt void Port_2(void)
 {
-    P2IFG &= ~(1 << MODE_BUTT);
+    _disable_interrupts();
+    P2IES ^= (1 << LAP_BUTT);
+    lapPressed ^= 1;
+    P2IFG &= ~(1 << LAP_BUTT);
+    _enable_interrupts();
 }
 
+// The NMI signal from the RST button also resets the JTAG. You have to remove the far right jumper for it to work, but then it won't enter the debugger.
+// Page 20 for more info https://www.ti.com/lit/ug/slau320aj/slau320aj.pdf?ts=1709806533301
 #pragma vector=UNMI_VECTOR
 __interrupt void UNMI(void) {
-    P1OUT |=  0x01;
-  // SFRIFG1 &= ~(1 << 4);
+    _disable_interrupts();
+    SFRRPCR ^= (1 << 1);
+    modePressed ^= 1;
+    SFRIFG1 &= ~(1 << 4);
+    _enable_interrupts();
+
 }
 
 #pragma vector=TIMER0_A0_VECTOR
@@ -73,6 +87,7 @@ int main(void)
     setup();
     LCD_init();
     current_process = 0;
+    startPressed, lapPressed, modePressed = 0;
     STATE = CHRONO;
     initialise_process(0, red_led);
     initialise_process(1, update_LCD);
