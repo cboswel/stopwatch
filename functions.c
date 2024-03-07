@@ -40,16 +40,16 @@ void update_LCD() {
     time = 0;
     for (;;) {
        if (STATE == CHRONO) {
-           int ms = time % 100;
-           int s = (time / 100) % 60;
-           int min = (time / (100 * 60)) % 60;
+           int ms = time % 1000;
+           int s = (time / 1000) % 60;
+           int min = (time / (1000 * 60)) % 60;
 
-           show_digit((min / 10) + '0', 0);
-           show_digit((min % 10) + '0', 1);
-           show_digit((s / 10) + '0', 2);
-           show_digit((s % 10) + '0', 3);
-           show_digit((ms / 10) + '0', 4);
-           show_digit((ms % 10) + '0', 5);
+           show_digit((min / 10), 0);
+           show_digit((min % 10), 1);
+           show_digit((s / 10), 2);
+           show_digit((s % 10), 3);
+           show_digit((ms / 100), 4);
+           show_digit(((ms /10 )% 10), 5);
        }
     }
 }
@@ -140,9 +140,27 @@ void setup()
     P4DIR |=  0x01;                 // Set P4.6 to output direction
     P1OUT &= ~0x01;                 // Set P1.0 off (Green LED)
     P4OUT &= ~0x01;                 // Set P4.6 off (Red LED)
-    P1DIR &= ~(1 << 3);
-    P1REN |= (1 << 3);
-    P1OUT |= (1 <<3);
+
+    // button setup
+    P1DIR &= ~(1 << START_BUTT);
+    P1REN |= (1 << START_BUTT);
+    P1OUT |= (1 << START_BUTT);
+    P1IE |= (1 << START_BUTT);
+    P1IES |=(1 << START_BUTT);
+    P1IFG &= ~(1 << START_BUTT);
+
+    P2DIR &= ~(1 << MODE_BUTT);
+    P2REN |= (1 << MODE_BUTT);
+    P2OUT |= (1 << MODE_BUTT);
+    P2IE |= (1 << MODE_BUTT);
+    P2IES |=(1 << MODE_BUTT);
+    P2IFG &= ~(1 << MODE_BUTT);
+
+    SFRRPCR = 0b1111;              // Reset pin control register. Resistor used, Pullup, Falling Edge, NMI mode.
+    // NMI = Non-Maskable Interrupt. Means this interrupt is unaffected by 'general interrupt enable' GIE.
+    SFRIE1 |= (1 << 4);             // NMIIE - enable interrupts on NMI pins (for the reset button)
+    SFRIFG1 &= ~(1 << 4);           // This is how you lower an NMI interrupt flag
+
 
                                     // Timer A0 (1ms interrupt)
     TA0CCR0 =  1024;                // Count up to 1024

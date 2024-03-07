@@ -5,8 +5,8 @@
 
 #define RLED 0
 #define GLED 0
-#define SW1 2
-#define SW2 6
+#define START_BUTT 2
+#define MODE_BUTT 6
 
 #define LONG unsigned long
 #define WORD unsigned short

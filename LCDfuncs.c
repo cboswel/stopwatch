@@ -31,43 +31,43 @@ void LCD_init() {
 
 void char_to_digit(char character, char shape[2]) {
 
-    if (character == '9') {
+    if (character == '9' || character == '\9') {  // For convenience: int 9 == char '\9' so we can send ints as input
         shape[0] = 0b11110111;
         shape[1] = 0b00000000;
     }
-    else if (character == '8') {
+    else if (character == '8' || character == '\8') {
         shape[0] = 0b00000000;
         shape[1] = 0b00000000;
     }
-    else if (character == '7') {
+    else if (character == '7' || character == '\7') {
         shape[0] = 0b10000000;
         shape[1] = 0b00100100;
     }
-    else if (character == '6') {
+    else if (character == '6' || character == '\6') {
         shape[0] = 0b00000000;
         shape[1] = 0b00000000;
     }
-    else if (character == '5') {
+    else if (character == '5' || character == '\5') {
         shape[0] = 0b00000000;
         shape[1] = 0b00000000;
     }
-    else if (character == '4') {
+    else if (character == '4' || character == '\4') {
         shape[0] = 0b00000000;
         shape[1] = 0b00000000;
     }
-    else if (character == '3') {
+    else if (character == '3' || character == '\3') {
         shape[0] = 0b00000000;
         shape[1] = 0b00000000;
     }
-    else if (character == '2') {
+    else if (character == '2' || character == '\2') {
         shape[0] = 0b00000000;
         shape[1] = 0b00000000;
     }
-    else if (character == '1') {
-        shape[0] = 0b11111111;
+    else if (character == '1' || character == '\1') {
+        shape[0] = 0b01100000;
         shape[1] = 0b00000000;
     }
-    else if (character == '0') {
+    else if (character == '0' || character == '\0') {
         shape[0] = 0b11111100;
         shape[1] = 0b00000000;
     }
