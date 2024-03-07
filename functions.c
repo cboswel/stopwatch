@@ -80,28 +80,32 @@ void update_LCD() {
 void stopwatch() {
     time = 0;
     lapTime = 0;
+    int prevTime = 0;
     for (;;) {
         wait(&buttonEvent);
         if (stopwatchRunning == 0) {
             if (startPressed == 1) {
                 startPressed = 0;
-                stopwatchRunning = 1;
+                if (STATE == CHRONO) {
+                    stopwatchRunning = 1;
+                }
             }
             if (lapPressed == 1) {
                 lapPressed = 0;
                 time = 0;
-                STATE = CHRONO;
             }
         }
         else if (stopwatchRunning == 1) {
             if (startPressed == 1) {
                 startPressed == 0;
                 stopwatchRunning = 0;
+                STATE = CHRONO;
             }
             if (lapPressed == 1) {
                 lapPressed = 0;
                 STATE = LAP;
-                lapTime = time - lapTime;
+                lapTime = time - prevTime;
+                prevTime = time;
             }
         }
     }
@@ -198,9 +202,9 @@ void setup()
     P1DIR &= ~(1 << START_BUTT);
     P1REN |= (1 << START_BUTT);
     P1OUT |= (1 << START_BUTT);
-    P1IE |= (1 << START_BUTT);
-    P1IES |= (1 << START_BUTT);
-    P1IFG &= ~(1 << START_BUTT);
+    P1IE |= (1 << START_BUTT);      // Interrupt enable
+    P1IES |= (1 << START_BUTT);     // Interrupt Edge Select
+    P1IFG &= ~(1 << START_BUTT);    // Clear trhe interrupt flag just in case
 
     P2DIR &= ~(1 << LAP_BUTT);
     P2REN |= (1 << LAP_BUTT);

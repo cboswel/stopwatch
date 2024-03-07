@@ -131,7 +131,7 @@ void colons(char shape[2], int pos) {
         if (STATE == MONTH) {
             shape[1] |= 0b00000001; // add a decimal point
         }
-        else if (STATE == CHRONO) {
+        else if (STATE == CHRONO || STATE == LAP) {
             shape[1] |= 0b00000100; // add a colon
         }
     }
