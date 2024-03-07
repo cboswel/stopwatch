@@ -15,13 +15,12 @@ __interrupt void UNUSED_HWI_ISR (void)
 __no_operation();
 }
 
-
 #pragma vector=PORT1_VECTOR
 __interrupt void Port_1(void)
 {
     _disable_interrupts();
-    P1IES ^= (1 << START_BUTT);
-    startPressed ^= 1;
+    startPressed = 1;
+    buttonEvent = 1;
     P1IFG &= ~(1 << START_BUTT);
     _enable_interrupts();
 }
@@ -30,8 +29,8 @@ __interrupt void Port_1(void)
 __interrupt void Port_2(void)
 {
     _disable_interrupts();
-    P2IES ^= (1 << LAP_BUTT);
-    lapPressed ^= 1;
+    lapPressed = 1;
+    buttonEvent = 1;
     P2IFG &= ~(1 << LAP_BUTT);
     _enable_interrupts();
 }
@@ -41,11 +40,10 @@ __interrupt void Port_2(void)
 #pragma vector=UNMI_VECTOR
 __interrupt void UNMI(void) {
     _disable_interrupts();
-    SFRRPCR ^= (1 << 1);
-    modePressed ^= 1;
+    modePressed = 1;
+    buttonEvent = 1;
     SFRIFG1 &= ~(1 << 4);
     _enable_interrupts();
-
 }
 
 #pragma vector=TIMER0_A0_VECTOR
@@ -79,7 +77,9 @@ __interrupt void Timer0_A0 (void)    // Timer0 A0 1ms interrupt service routine
             " pop.a R9 \n"
             " pop.a R10 \n"
     );
-    time++;
+    if (stopwatchRunning == 1) {
+        time++;
+    }
 }
 
 int main(void)
@@ -87,9 +87,9 @@ int main(void)
     setup();
     LCD_init();
     current_process = 0;
-    startPressed, lapPressed, modePressed = 0;
+    startPressed, lapPressed, modePressed, buttonEvent = 0;
     STATE = CHRONO;
-    initialise_process(0, red_led);
+    initialise_process(0, stopwatch);
     initialise_process(1, update_LCD);
     run_process(current_process);
     _BIS_SR(GIE);                   // interrupts enabled

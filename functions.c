@@ -36,8 +36,19 @@ void green_led()
     }
 }
 
+void wait(char* s) {
+    volatile int z;
+    do
+    {
+        _enable_interrupts();
+        z++;
+        _disable_interrupts();
+    } while(*s==0);
+    *s = 0;
+    _enable_interrupts();
+}
+
 void update_LCD() {
-    time = 0;
     for (;;) {
        if (STATE == CHRONO) {
            int ms = time % 1000;
@@ -51,6 +62,48 @@ void update_LCD() {
            show_digit((ms / 100), 4);
            show_digit(((ms /10 )% 10), 5);
        }
+       if (STATE == LAP) {
+           int ms = lapTime % 1000;
+           int s = (lapTime / 1000) % 60;
+           int min = (lapTime / (1000 * 60)) % 60;
+
+           show_digit((min / 10), 0);
+           show_digit((min % 10), 1);
+           show_digit((s / 10), 2);
+           show_digit((s % 10), 3);
+           show_digit((ms / 100), 4);
+           show_digit(((ms /10 )% 10), 5);
+       }
+    }
+}
+
+void stopwatch() {
+    time = 0;
+    lapTime = 0;
+    for (;;) {
+        wait(&buttonEvent);
+        if (stopwatchRunning == 0) {
+            if (startPressed == 1) {
+                startPressed = 0;
+                stopwatchRunning = 1;
+            }
+            if (lapPressed == 1) {
+                lapPressed = 0;
+                time = 0;
+                STATE = CHRONO;
+            }
+        }
+        else if (stopwatchRunning == 1) {
+            if (startPressed == 1) {
+                startPressed == 0;
+                stopwatchRunning = 0;
+            }
+            if (lapPressed == 1) {
+                lapPressed = 0;
+                STATE = LAP;
+                lapTime = time - lapTime;
+            }
+        }
     }
 }
 
@@ -167,6 +220,7 @@ void setup()
     TA0CCTL0 = 0x10;                // Enable counter interrupts, bit 4=1
     TA0CTL =  TASSEL_2 + MC_1;      // Timer A using subsystem master clock, SMCLK(1.1 MHz)
                                     // and count UP to create a 1ms interrupt
+
 
     _BIS_SR(GIE);                   // interrupts enabled
 }
