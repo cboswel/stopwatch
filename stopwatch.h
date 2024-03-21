@@ -18,7 +18,12 @@ extern void red_led();
 extern void green_led();
 extern void update_LCD();
 extern void stopwatch();
+extern void stopwatchState();
+extern void clock();
+extern void clockState();
+extern void timesetState();
 extern void show_digit(char character, int pos);
+extern void initialise_process(unsigned int process_index, void (*funct)());
 
 struct ProcessControlBlock
 {
@@ -27,14 +32,16 @@ struct ProcessControlBlock
 };
 struct ProcessControlBlock process[MAX_PROCESSES];
 
-enum state{STARTUP, CLOCK, MONTH, TIMESET, ALARMSET, CHRONO, LAP};
+enum state{STARTUP, CLOCK, MONTH, ALARM, TIMESET, ALARMSET, CHRONO, LAP};
+static const char *days[7] = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
 int STATE;
 
 unsigned int current_process;
-volatile unsigned int time;
+volatile unsigned int time, minutes, hours, day, month;
 volatile unsigned int r;
 volatile int startPressed, lapPressed, modePressed, buttonEvent;
 volatile int stopwatchRunning, lapTime;
+volatile char alarmActive, chimeActive;
 LONG status;
 LONG stack_pointer;
 LONG program_counter;

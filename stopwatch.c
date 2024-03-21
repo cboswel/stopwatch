@@ -19,8 +19,9 @@ __no_operation();
 __interrupt void Port_1(void)
 {
     _disable_interrupts();
-    startPressed = 1;
     buttonEvent = 1;
+    startPressed = 1;
+    P1IES ^= (1 << START_BUTT);
     P1IFG &= ~(1 << START_BUTT);
     _enable_interrupts();
 }
@@ -29,8 +30,11 @@ __interrupt void Port_1(void)
 __interrupt void Port_2(void)
 {
     _disable_interrupts();
-    lapPressed = 1;
     buttonEvent = 1;
+    if (P2IES & (1 << LAP_BUTT) != 0) { // Edge select is 1, therefore button has just been pressed
+        lapPressed = 1;
+    }
+    P2IES ^= (1 << LAP_BUTT);
     P2IFG &= ~(1 << LAP_BUTT);
     _enable_interrupts();
 }
@@ -88,8 +92,10 @@ int main(void)
     LCD_init();
     current_process = 0;
     startPressed, lapPressed, modePressed, buttonEvent = 0;
-    STATE = CHRONO;
-    initialise_process(0, stopwatch);
+    minutes, hours, day = 0;
+    alarmActive, chimeActive = 0;
+    STATE = CLOCK;
+    initialise_process(0, clockState);
     initialise_process(1, update_LCD);
     run_process(current_process);
     _BIS_SR(GIE);                   // interrupts enabled

@@ -74,6 +74,94 @@ void update_LCD() {
            show_digit((ms / 100), 4);
            show_digit(((ms /10 )% 10), 5);
        }
+       if (STATE == CLOCK) {
+           show_digit((hours / 10), 0);
+           show_digit((hours % 10), 1);
+           show_digit((minutes / 10), 2);
+           show_digit((minutes % 10), 3);
+           show_digit(days[day][0], 4);
+           show_digit(days[day][1], 5);
+       }
+    }
+}
+
+void changeState() {
+    buttonEvent = 0;
+    if (STATE == CHRONO) {
+        initialise_process(0, clockState);
+    }
+    else if (STATE == CLOCK) {
+        initialise_process(0, timesetState);
+    }
+    else if (STATE == TIMESET) {
+        intialise_process(0, stopwatchState);
+    }
+}
+
+void clockState() {
+    for (;;) {
+        wait(&buttonEvent);
+        if (startPressed == 1) {
+            if ((P1IN & (1 << START_BUTT)) == 0) {
+                STATE = MONTH;
+            }
+            else if ((P2IN & (1 << LAP_BUTT)) == 0) {
+                alarmActive ^= 1;
+            }
+            else {
+                STATE = CLOCK;
+            }
+            startPressed = 0;
+        }
+        else if (lapPressed == 1) {
+            if ((P2IN & (1 << LAP_BUTT)) == 0) {
+                STATE = ALARM;
+            }
+            else {
+                STATE = CLOCK;
+            }
+            lapPressed = 0;
+        }
+        else if (modePressed == 1) {
+            if ((P2IN & (1 << LAP_BUTT)) == 0) {
+                chimeActive ^= 1;
+            }
+            else {
+               // changeState();
+            }
+            modePressed = 0;
+        }
+        buttonEvent = 0;
+    }
+}
+
+void clock() {
+    for (;;) {
+        /**
+         * To keep the clock up to date:
+         * Every ms a counter is incremented, called time. Regardless of state or mode.
+         * When we run this process, we look at how many ms have elapsed and update m, hr, day accordingly.
+         * We then remove any minutes that we counted from the ms timer.
+         */
+        if (time > (60 * 1000)) {   // Only act after at least a minute has elapsed (60,000 ms)
+            minutes += (time / 1000 * 60);
+            hours += (minutes / 60);
+            day += (hours / 24);
+            month += (day / 31); // TODO: Not all months have 31 days
+
+            minutes %= 60;
+            hours %= 24;
+            day %= 7;
+            month %= 12;
+
+            time %= (1000 * 60);
+        }
+    }
+}
+
+void timeset() {
+    for (;;) {
+        wait(&buttonEvent);
     }
 }
 
@@ -204,7 +292,7 @@ void setup()
     P1OUT |= (1 << START_BUTT);
     P1IE |= (1 << START_BUTT);      // Interrupt enable
     P1IES |= (1 << START_BUTT);     // Interrupt Edge Select
-    P1IFG &= ~(1 << START_BUTT);    // Clear trhe interrupt flag just in case
+    P1IFG &= ~(1 << START_BUTT);    // Clear the interrupt flag just in case
 
     P2DIR &= ~(1 << LAP_BUTT);
     P2REN |= (1 << LAP_BUTT);
