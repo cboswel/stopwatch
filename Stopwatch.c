@@ -35,7 +35,7 @@ __interrupt void Port_1(void)
 {
     _disable_interrupts();
     buttonEvent = 1;
-    modePressed = 1;
+    startPressed = 1;
     P1IES ^= (1 << START_BUTT);
     P1IFG &= ~(1 << START_BUTT);
     _enable_interrupts();
@@ -87,7 +87,7 @@ __interrupt void Timer0_A0 (void)    // Timer0 A0 1ms interrupt service routine
             " movx.a sp,&stack_pointer\n"
         );
 
-    process[current_process].sp = stack_pointer;
+    process[toggle_process].sp = stack_pointer;
     current_process = (current_process+1) % MAX_PROCESSES;
     toggle_process = current_process;
     if (current_process == 3) {
@@ -122,8 +122,8 @@ int main(void)
     initialise_process(0, update_LCD);
     initialise_process(1, alarmCheck);
     initialise_process(2, clock);
-    initialise_process(4, clockState);
-    initialise_process(3, timeset);
+    initialise_process(3, clockState);
+    initialise_process(4, timeset);
     initialise_process(5, stopwatch);
     initialise_process(6, alarmRing);
     TA0CCTL0 = 0x10;                // Enable counter interrupts, bit 4=1

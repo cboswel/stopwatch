@@ -41,7 +41,7 @@ struct ProcessControlBlock
 };
 struct ProcessControlBlock process[MAX_PROCESSES + 3];
 
-enum state{STARTUP, CLOCK, MONTH, ALARM, TIMESET, ALARMSET, CHRONO, LAP};
+enum state{CLOCK, ALARM, TIMESET, CHRONO};
 static const char *days[7] = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
 static const int monthLength[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 int STATE, currentState, newState;

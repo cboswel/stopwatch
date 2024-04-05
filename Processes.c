@@ -35,6 +35,7 @@ void clockState() {
      * Process to pick up user input and to modify behaviour accordingly.
      */
     for (;;) {
+        STATE = CLOCK;
         wait(&buttonEvent);
         if (startPressed == 1) {
             if ((P1IN & (1 << START_BUTT)) == 0) {
@@ -86,6 +87,7 @@ void timeset() {
      * to increment the value of each settable unit of time.
      */
     for (;;) {
+        STATE = TIMESET;
         selectedField = 0;
         wait(&buttonEvent);
         if (alarmSetMode == 0) {
@@ -144,6 +146,7 @@ void alarmCheck() {
 
 void alarmRing() {
     long sixtySeconds = getTime() + MINUTE;
+    STATE = ALARM;
     while (getTime() < sixtySeconds | buttonEvent == 0);
     buttonEvent = 0;
     if ((lapPressed == 1) & (alarmTime > getTime())) {
@@ -160,13 +163,13 @@ void stopwatch() {
      * Process to accept user input during the stopwatch mode of operation.
      */
     int prevTime = 0;
-    STATE = CHRONO;
     for (;;) {
+        STATE = CHRONO;
         wait(&buttonEvent);
         if (stopwatchRunning == 0) {
             if (startPressed == 1) {
                 startPressed = 0;
-                if (STATE == CHRONO) {
+                if (lapMode == 0) {
                     stopwatchRunning = 1;
                 }
             }
@@ -177,10 +180,10 @@ void stopwatch() {
         else if (stopwatchRunning == 1) {
             if (startPressed == 1) {
                 stopwatchRunning = 0;
-                STATE = CHRONO;
+                lapMode = 1;
             }
             if (lapPressed == 1) {
-                STATE = LAP;
+                lapMode = 1;
                 lapTime = stopwatchTime - prevTime;
                 prevTime = stopwatchTime;
             }
@@ -249,6 +252,7 @@ void change_state() {
         toggle = 2;
     }
     else if (STATE == TIMESET) {
+        STATE = CHRONO;
         LCDBLKCTL |= 0b11;   // Start alternating mode blinking
         toggle = 1;
     }
