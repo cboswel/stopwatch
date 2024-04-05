@@ -39,18 +39,18 @@ struct ProcessControlBlock
     LONG sp;
     BYTE stack[STACK_SIZE];
 };
-struct ProcessControlBlock process[MAX_PROCESSES];
+struct ProcessControlBlock process[MAX_PROCESSES + 3];
 
 enum state{STARTUP, CLOCK, MONTH, ALARM, TIMESET, ALARMSET, CHRONO, LAP};
 static const char *days[7] = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
 static const int monthLength[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-int STATE, currentState;
+int STATE, currentState, newState;
 
-volatile unsigned int current_process;
+volatile unsigned int current_process, toggle_process;
 volatile unsigned long time, stopwatchTime, lapTime, alarmTime;
 volatile unsigned int minutes, hours, day, date, month; // day = day of the week (out of 7), date = day of the month (out of 31)
 volatile unsigned int r;
-volatile char startPressed, lapPressed, modePressed, buttonEvent;
+volatile char startPressed, lapPressed, modePressed, buttonEvent, toggle;
 volatile char alarmActive, chimeActive;
 volatile char alarmSetMode, lapMode, monthMode, stopwatchRunning, selectedField;
 LONG status;
@@ -64,7 +64,7 @@ WORD pc2;
 
 extern void alarm_update(char field);
 extern void blink_digit(char field);
-extern void change_state(int state);
+extern void change_state();
 extern void display_alarm();
 extern void display_alert();
 extern void display_clock();

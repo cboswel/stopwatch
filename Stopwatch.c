@@ -35,7 +35,7 @@ __interrupt void Port_1(void)
 {
     _disable_interrupts();
     buttonEvent = 1;
-    startPressed = 1;
+    modePressed = 1;
     P1IES ^= (1 << START_BUTT);
     P1IFG &= ~(1 << START_BUTT);
     _enable_interrupts();
@@ -89,7 +89,11 @@ __interrupt void Timer0_A0 (void)    // Timer0 A0 1ms interrupt service routine
 
     process[current_process].sp = stack_pointer;
     current_process = (current_process+1) % MAX_PROCESSES;
-    stack_pointer = process[current_process].sp;
+    toggle_process = current_process;
+    if (current_process == 3) {
+        toggle_process += toggle;
+    }
+    stack_pointer = process[toggle_process].sp;
 
     asm(
             " movx.a &stack_pointer,SP \n"
@@ -118,12 +122,14 @@ int main(void)
     initialise_process(0, update_LCD);
     initialise_process(1, alarmCheck);
     initialise_process(2, clock);
-    initialise_process(3, clockState);
+    initialise_process(4, clockState);
+    initialise_process(3, timeset);
+    initialise_process(5, stopwatch);
+    initialise_process(6, alarmRing);
     TA0CCTL0 = 0x10;                // Enable counter interrupts, bit 4=1
     TA0CTL =  TASSEL_2 + MC_1;      // Timer A using subsystem master clock, SMCLK(1.1 MHz)
                                     // and count UP to create a 1ms interrupt
     run_process(0);
-    _BIS_SR(GIE);                   // interrupts enabled
+    _BIS_SR(GIE);                  // interrupts enabled
     for (;;);
-    return 0;
 }

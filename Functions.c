@@ -125,33 +125,11 @@ long getTime() {
     return longTime;
 }
 
-void change_state(int newState) {
-    /**
-     * Change between the different states that the MODE button cycles through
-     */
-    if (newState == CHRONO) {
-        LCDBLKCTL &= ~(0b11);   // No blinking
-        initialise_process(3, stopwatch);
-    }
-    else if (newState == TIMESET) {
-        LCDBLKCTL |= 0b11;   // Start alternating mode blinking
-        initialise_process(3, timeset);
-    }
-    else if (newState == CLOCK) {
-        LCDBLKCTL &= ~(0b11);   // No blinking
-        initialise_process(3, clockState);
-    }
-    else if (newState == ALARM) {
-        LCDBLKCTL |= 0b11;   // Start alternating mode blinking
-        initialise_process(3, alarmRing);
-    }
-}
-
 void initialise_process(unsigned int process_index, void (*funct)()) {
     /**
      * Function to add a function pointer to the start of a Process Control Block and to wipe it
      */
-    if (process_index < MAX_PROCESSES) {
+    if (process_index < MAX_PROCESSES + 4) {
         asm(
                 " movx.a SR,&status\n"
             );
@@ -191,7 +169,7 @@ void run_process(unsigned int process_index) {
      * Function to set an initialised process running. Timeslicing assumes a running process, so they
      * must be started manually
      */
-    if (process_index < MAX_PROCESSES) {
+    if (process_index < MAX_PROCESSES + 4) {
 	stack_pointer = process[process_index].sp;
         asm(
                 " movx.a &stack_pointer,SP \n"

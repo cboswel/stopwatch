@@ -69,7 +69,8 @@ void clockState() {
                 chimeActive ^= 1;
             }
             else {
-               change_state(TIMESET);
+                STATE = TIMESET;
+                change_state();
             }
         }
         buttonEvent = 0;
@@ -110,7 +111,8 @@ void timeset() {
                 modePressed = 0;
                 buttonEvent = 0;
                 alarmSetMode = 0;
-                change_state(CHRONO);
+                STATE = CHRONO;
+                change_state();
             }
         }
         modePressed = 0;
@@ -126,12 +128,14 @@ void alarmCheck() {
         if (alarmActive == 1) {
             if (getTime() > alarmTime) {
                 currentState = STATE;
-                change_state(ALARM);
+                STATE = ALARM;
+                change_state();
             }
             if (chimeActive == 1) {
                 if ((minutes == 0) & (time < SECOND)) {
                     currentState = STATE;
-                    change_state(ALARM);
+                    STATE = ALARM;
+                    change_state();
                 }
             }
         }
@@ -156,6 +160,7 @@ void stopwatch() {
      * Process to accept user input during the stopwatch mode of operation.
      */
     int prevTime = 0;
+    STATE = CHRONO;
     for (;;) {
         wait(&buttonEvent);
         if (stopwatchRunning == 0) {
@@ -186,7 +191,8 @@ void stopwatch() {
             lapPressed = 0;
             buttonEvent = 0;
             stopwatchRunning = 0;
-            change_state(CLOCK);
+            STATE = CLOCK;
+            change_state();
         }
         modePressed = 0;
         startPressed = 0;
@@ -231,4 +237,28 @@ void update_LCD() {
        }
        LCD_extras();
     }
+}
+
+void change_state() {
+    /**
+     * Change between the different states that the MODE button cycles through
+     */
+    _disable_interrupts();
+    if (STATE == CHRONO) {
+        LCDBLKCTL &= ~(0b11);   // No blinking
+        toggle = 2;
+    }
+    else if (STATE == TIMESET) {
+        LCDBLKCTL |= 0b11;   // Start alternating mode blinking
+        toggle = 1;
+    }
+    else if (STATE == CLOCK) {
+        LCDBLKCTL &= ~(0b11);   // No blinking
+        toggle = 0;
+    }
+    else if (STATE == ALARM) {
+        LCDBLKCTL |= 0b11;   // Start alternating mode blinking
+        toggle = 3;
+    }
+    _enable_interrupts();
 }
