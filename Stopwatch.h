@@ -21,7 +21,7 @@
 #define LONG unsigned long
 #define WORD unsigned short
 #define BYTE unsigned char
-#define MAX_PROCESSES   4
+#define MAX_PROCESSES   3
 #define STACK_SIZE      100
 
 // Process prototypes
@@ -41,7 +41,7 @@ struct ProcessControlBlock
 };
 struct ProcessControlBlock process[MAX_PROCESSES + 3];
 
-enum state{CLOCK, ALARM, TIMESET, CHRONO};
+enum state{CLOCK, TIMESET, CHRONO, ALARM};
 static const char *days[7] = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
 static const int monthLength[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 int STATE, currentState, newState;

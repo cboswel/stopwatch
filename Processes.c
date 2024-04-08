@@ -6,55 +6,25 @@
 
 void clock() {
     /**
-     * Runs in parallel with the clock state machine to keep the clock up to date.
-     * Every ms a counter is incremented, called time. Regardless of state or mode.
-     * When we run this process, we look at how many ms have elapsed and update m, hr, day accordingly.
-     * We then remove any minutes that we counted from the ms timer.
-     */
-    for (;;) {
-        if (time > MINUTE) {   // Only act after at least a minute has elapsed (60,000 ms)
-            minutes += (time / MINUTE);
-            hours += (minutes / 60);
-            day += (hours / 24);
-            date += (hours / 24);
-            month += (day / monthLength[month]);
-
-            minutes %= 60;
-            hours %= 24;
-            day %= 7;
-            date %= monthLength[month];
-            month %= 12;
-
-            time %= MINUTE;
-        }
-    }
-}
-
-void clockState() {
-    /**
      * Process to pick up user input and to modify behaviour accordingly.
      */
     for (;;) {
-        STATE = CLOCK;
-        wait(&buttonEvent);
+        while (buttonEvent == 0 && time < MINUTE);
         if (startPressed == 1) {
-            if ((P1IN & (1 << START_BUTT)) == 0) {
+            if (alarmSetMode == 0 && (P1IN & (1 << START_BUTT)) == 0) {
                 monthMode = 1;
             }
             else {
                 monthMode = 0;
             }
-            if ((P2IN & (1 << LAP_BUTT)) == 0) {
+            if (alarmSetMode == 1 && (P1IN & (1 << START_BUTT)) == 0) {
                 if (getTime() > alarmTime) {
                     alarmTime = (alarmTime % DAY) + ((getTime() / DAY) + DAY);
                 }
                 alarmActive ^= 1;
             }
-            else {
-                STATE = CLOCK;
-            }
         }
-        else if (lapPressed == 1) {
+        if (lapPressed == 1) {
             if ((P2IN & (1 << LAP_BUTT)) == 0) {
                 alarmSetMode = 1;
             }
@@ -62,7 +32,7 @@ void clockState() {
                 alarmSetMode = 0;
             }
         }
-        else if (modePressed == 1) {
+        if (modePressed == 1) {
             alarmSetMode = 0;
             modePressed = 0;
             buttonEvent = 0;
@@ -78,6 +48,7 @@ void clockState() {
         modePressed = 0;
         startPressed = 0;
         lapPressed = 0;
+        clock_update();
     }
 }
 
@@ -86,27 +57,27 @@ void timeset() {
      * Process to run during the time set mode. Receives user input and uses the timeAdv function
      * to increment the value of each settable unit of time.
      */
+    selectedField = 0;
     for (;;) {
-        STATE = TIMESET;
-        selectedField = 0;
         wait(&buttonEvent);
         if (alarmSetMode == 0) {
-            if (startPressed == 1) {
+            if ((startPressed == 1) && (P1IN & (1 << START_BUTT)) == 0) {
                 timeAdv(selectedField % 5);
             }
-            else if (lapPressed == 1) {
+            if ((lapPressed == 1) && (P2IN & (1 << LAP_BUTT)) == 0) {
                 selectedField++;
             }
             else if (modePressed == 1) {
+                modePressed =  0;
                 alarmSetMode = 1;
                 selectedField = 1;      // Start off on left-most digits
             }
         }
         else if (alarmSetMode == 1) {
-            if (startPressed == 1) {
+            if ((startPressed == 1) && (P1IN & (1 << START_BUTT)) == 0) {
                 alarm_update(selectedField % 2);
             }
-            else if (lapPressed == 1) {
+            else if ((lapPressed == 1) && (P2IN & (1 << LAP_BUTT)) == 0) {
                 selectedField++;
             }
             else if (modePressed == 1) {
@@ -121,6 +92,7 @@ void timeset() {
         startPressed = 0;
         lapPressed = 0;
         buttonEvent = 0;
+        clock_update();
     }
 }
 
@@ -164,25 +136,21 @@ void stopwatch() {
      */
     int prevTime = 0;
     for (;;) {
-        STATE = CHRONO;
         wait(&buttonEvent);
         if (stopwatchRunning == 0) {
-            if (startPressed == 1) {
-                startPressed = 0;
-                if (lapMode == 0) {
-                    stopwatchRunning = 1;
-                }
+            if ((lapMode == 0) && (P1IN & (1 << START_BUTT)) == 0) {
+                stopwatchRunning = 1;
             }
-            if (lapPressed == 1) {
+            if ((P2IN & (1 << LAP_BUTT)) == 0) {
                 stopwatchTime = 0;
             }
         }
-        else if (stopwatchRunning == 1) {
-            if (startPressed == 1) {
+        else {
+            if ((P1IN & (1 << START_BUTT)) == 0) {
                 stopwatchRunning = 0;
-                lapMode = 1;
+                lapMode = 0;
             }
-            if (lapPressed == 1) {
+            if ((P2IN & (1 << LAP_BUTT)) == 0) {
                 lapMode = 1;
                 lapTime = stopwatchTime - prevTime;
                 prevTime = stopwatchTime;
@@ -224,45 +192,22 @@ void update_LCD() {
            }
        }
        if (STATE == TIMESET) {
-           if (alarmSetMode == 1) {
+           if (alarmSetMode == 0) {
+               if (monthMode == 0) {
+                   display_clock();
+               }
+               else {
+                   display_month();
+               }
+               blink_digit(selectedField % 5 % 3);
+           } else {
                display_alarm();
+               blink_digit(selectedField % 2);
            }
-           else if (monthMode == 0) {
-               display_clock();
-           }
-           else {
-               display_month();
-           }
-           blink_digit(selectedField % 5 % 3);
        }
        if (STATE == ALARM) {
            display_alert();
        }
        LCD_extras();
     }
-}
-
-void change_state() {
-    /**
-     * Change between the different states that the MODE button cycles through
-     */
-    _disable_interrupts();
-    if (STATE == CHRONO) {
-        LCDBLKCTL &= ~(0b11);   // No blinking
-        toggle = 2;
-    }
-    else if (STATE == TIMESET) {
-        STATE = CHRONO;
-        LCDBLKCTL |= 0b11;   // Start alternating mode blinking
-        toggle = 1;
-    }
-    else if (STATE == CLOCK) {
-        LCDBLKCTL &= ~(0b11);   // No blinking
-        toggle = 0;
-    }
-    else if (STATE == ALARM) {
-        LCDBLKCTL |= 0b11;   // Start alternating mode blinking
-        toggle = 3;
-    }
-    _enable_interrupts();
 }

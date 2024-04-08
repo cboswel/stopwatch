@@ -90,8 +90,8 @@ __interrupt void Timer0_A0 (void)    // Timer0 A0 1ms interrupt service routine
     process[toggle_process].sp = stack_pointer;
     current_process = (current_process+1) % MAX_PROCESSES;
     toggle_process = current_process;
-    if (current_process == 3) {
-        toggle_process += toggle;
+    if (current_process == 2) {
+        toggle_process += STATE;
     }
     stack_pointer = process[toggle_process].sp;
 
@@ -122,10 +122,9 @@ int main(void)
     initialise_process(0, update_LCD);
     initialise_process(1, alarmCheck);
     initialise_process(2, clock);
-    initialise_process(3, clockState);
-    initialise_process(4, timeset);
-    initialise_process(5, stopwatch);
-    initialise_process(6, alarmRing);
+    initialise_process(3, timeset);
+    initialise_process(4, stopwatch);
+    initialise_process(5, alarmRing);
     TA0CCTL0 = 0x10;                // Enable counter interrupts, bit 4=1
     TA0CTL =  TASSEL_2 + MC_1;      // Timer A using subsystem master clock, SMCLK(1.1 MHz)
                                     // and count UP to create a 1ms interrupt

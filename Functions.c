@@ -16,13 +16,29 @@ void wait(volatile char* s) {
     _enable_interrupts();
 }
 
+void clock_update() {
+    minutes += (time / MINUTE);
+    hours += (minutes / 60);
+    day += (hours / 24);
+    date += (hours / 24);
+    month += (day / monthLength[month]);
+
+    minutes %= 60;
+    hours %= 24;
+    day %= 7;
+    date %= monthLength[month];
+    month %= 12;
+
+    time %= MINUTE;
+}
+
 void display_stopwatch() {
     /**
      * Displays the stopwatch view: Minutes, seconds, milliseconds.
      */
-    int ms = time % 1000;
-    int s = (time / 1000) % 60;
-    int min = (time / (1000 * 60)) % 60;
+    int ms = stopwatchTime % 1000;
+    int s = (stopwatchTime / 1000) % 60;
+    int min = (stopwatchTime / (1000 * 60)) % 60;
     if (lapMode == 1) {
         ms = lapTime % 1000;
         s = (lapTime / 1000) % 60;
@@ -61,8 +77,8 @@ void display_month() {
 }
 
 void display_alarm() {
-    int mins = (alarmTime / 60 * 1000) % 60;
-    int hrs = (alarmTime / (60 * 1000) / 60) % 24;
+    int mins = (alarmTime / MINUTE) % 60;
+    int hrs = (alarmTime / HOUR) % 24;
     show_digit((hrs / 10), 0);
     show_digit((hrs % 10), 1);
     show_digit((mins / 10), 2);
@@ -88,6 +104,25 @@ void display_alert() {
     blink_digit(2);
 }
 
+void change_state() {
+    /**
+     * Change between the different states that the MODE button cycles through
+     */
+    if (STATE == CHRONO) {
+        LCDBLKCTL &= ~(0b11);   // No blinking
+    }
+    else if (STATE == TIMESET) {
+        selectedField = 0;
+        LCDBLKCTL |= 0b11;   // Start alternating mode blinking
+    }
+    else if (STATE == CLOCK) {
+        LCDBLKCTL &= ~(0b11);   // No blinking
+    }
+    else if (STATE == ALARM) {
+        LCDBLKCTL |= 0b11;   // Start alternating mode blinking
+    }
+}
+
 void timeAdv(char field) {
     /**
      * Used to increment whichever unit of time the user currently has selected during timeset mode.
@@ -111,9 +146,9 @@ void timeAdv(char field) {
 
 void alarm_update(char field) {
     if (field == 0) {          // field 0 = minutes
-        alarmTime += 1000 * 60;
+        alarmTime += MINUTE;
     } else if (field == 1) {   // field 1 = hours
-        alarmTime += 1000 * 60 * 60;
+        alarmTime += HOUR;
     }
 }
 

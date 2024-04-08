@@ -1,4 +1,3 @@
-
 #include <Stopwatch.h>
 
 /**
@@ -38,7 +37,10 @@ void LCD_init() {
 }
 
 void char_to_digit(char character, char shape[2]) {
-
+/**
+ * Big map containing the binary sequences used to determine which LCD segments to
+ * light up for all the required characters
+**/
     if (character == '9' || character == '\9') {  // For convenience: int 9 == char '\9' so we can send ints as input
         shape[0] = 0b11110111;
         shape[1] = 0b00000000;
@@ -127,6 +129,11 @@ void char_to_digit(char character, char shape[2]) {
 }
 
 void colons(char shape[2], char pos) {
+/**
+ *  Function to add any colons or decimal points required by the mode.
+ *  These are controlled by certain bits in the binary sequence used to
+ *  represent the digits, and so must be added after the sequence is set.
+**/
     if (pos == 1) {
         if (monthMode == 0) {
             shape[1] |= 0b00000100; // add a colon
@@ -146,6 +153,7 @@ void colons(char shape[2], char pos) {
 }
 
 void LCD_extras() {
+// helper function to set / unset any of the symbols at the top of the LCD	
     if (alarmActive == 1) {
         LCDM12 |= (1 << 1);
     }
@@ -161,6 +169,10 @@ void LCD_extras() {
 }
 
 void set_digit(char shape[2], char pos) {
+/**
+ * This function takes a binary sequence representing the LCD segments to show and applies
+ * to the position. There are 6 positions, 0 - 5 from left to right.
+**/
     if (pos == 0) {
         LCDM4 = shape[0];
         LCDM5 = shape[1];
@@ -193,10 +205,10 @@ void show_digit(char character, char pos) {
      *  Input arguments: The character to display and a position
      *  indicating on which of the 6 14-seg displays to show it.
     **/
-    char shape[2] = {0, 0};
-    char_to_digit(character, shape);
-    colons(shape, pos);
-    set_digit(shape, pos);
+    char shape[2] = {0, 0};          // Pair of binary numbers to hold the pattern for the digit
+    char_to_digit(character, shape); // Fill out binary numbers with pattern for given digit
+    colons(shape, pos);              // Add any colons or decimal points if required
+    set_digit(shape, pos);           // Fill out the LCDM registers to display the digit
 }
 
 void blink_digit(char selectedField) {
