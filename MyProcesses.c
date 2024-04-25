@@ -142,40 +142,46 @@ void stopwatch() {
     /**
      * Process to accept user input during the stopwatch mode of operation.
      */
+
+    BYTE msg;
+    BYTE ButtonAddress;
+    BYTE ButtonState;
     int prevTime = 0;
     for (;;) {
-        wait( & buttonEvent);
+        do {
+            msg = receive(ProcessID); // Get msg from mailbox
+        } while (msg == EMPTY);
+
+        ButtonAddress = msg & 0xC; // Read address
+        ButtonState = msg & 0x03; // read status
+
         if (stopwatchRunning == 0) {
-            if ((lapMode == 0) && (P1IN & (1 << START_BUTT)) == 0) {
+            if ((lapMode == 0) && (ButtonAddress == START_BUTT) && (ButtonState == BUTT_PRESSED)) {
                 stopwatchRunning = 1;
             }
-            if ((P2IN & (1 << LAP_BUTT)) == 0) {
+            if (ButtonAddress == LAP_BUTT && ButtonState == BUTT_PRESSED) {
                 stopwatchTime = 0;
             }
         } else {
-            if ((P1IN & (1 << START_BUTT)) == 0) {
+            if (ButtonAddress == START_BUTT && ButtonState == BUTT_PRESSED) {
                 stopwatchRunning = 0;
                 lapMode = 0;
             }
-            if ((P2IN & (1 << LAP_BUTT)) == 0) {
+            if (ButtonAddress == LAP_BUTT && ButtonState == BUTT_PRESSED) {
                 lapMode = 1;
                 lapTime = stopwatchTime - prevTime;
                 prevTime = stopwatchTime;
             }
         }
         if (modePressed == 1) {
-            modePressed = 0;
-            startPressed = 0;
-            lapPressed = 0;
-            buttonEvent = 0;
+            ButtonAddress = 0; // Clear message variables
+            ButtonState = 0;
+            STATE = TIMESET; // If lap button not also pressed, enter Timeset
+            change_state(); // Update state
             stopwatchRunning = 0;
             STATE = CLOCK;
             change_state();
         }
-        modePressed = 0;
-        startPressed = 0;
-        lapPressed = 0;
-        buttonEvent = 0;
     }
 }
 
