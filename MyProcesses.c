@@ -66,11 +66,6 @@ void clock() {
 }
 }
 void timeset() {
-    /**
-     * Process to run during the time set mode. Receives user input and uses the timeAdv function
-     * to increment the value of each settable unit of time.
-     */
-
     selectedField = 0;
     BYTE msg;
     BYTE ButtonAddress;
@@ -78,39 +73,33 @@ void timeset() {
 
     for (;;) {
         do {
-
             msg = receive(ProcessID); // Get msg from mailbox
-
         } while (msg == EMPTY);
 
         ButtonAddress = msg & 0xC; // Read address
         ButtonState = msg & 0x03; // read status
 
         if (alarmSetMode == 0) {
-            if ((ButtonAddress) == START_BUTT && ButtonState == BUTT_PRESSED) {
+            if (ButtonAddress == START_BUTT && ButtonState == BUTT_PRESSED) {
                 timeAdv(selectedField % 5);
             }
-            if (ButtonState == LAP_BUTT && ButtonState == BUTT_PRESSED) {
+            if (ButtonAddress == LAP_BUTT && ButtonState == BUTT_PRESSED) {
                 selectedField++;
             } else if (ButtonAddress == MODE_BUTT) {
                 alarmSetMode = 1;
                 selectedField = 1; // Start off on left-most digits
             }
         } else if (alarmSetMode == 1) {
-            if ((ButtonAddress) == START_BUTT && ButtonState == BUTT_PRESSED) {
+            if (ButtonAddress == START_BUTT && ButtonState == BUTT_PRESSED) {
                 alarm_update(selectedField % 2);
             } else if (ButtonAddress == LAP_BUTT && ButtonState == BUTT_PRESSED) {
                 selectedField++;
             } else if (ButtonAddress == MODE_BUTT) {
-                ButtonAddress = 0; // clear button variables
-                ButtonState = 0;
                 alarmSetMode = 0;
                 STATE = CHRONO;
                 change_state();
             }
         }
-        ButtonAddress = 0; // clear button variables
-        ButtonState = 0;
         clock_update(); // update time
     }
 }

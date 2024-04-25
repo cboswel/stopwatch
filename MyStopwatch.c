@@ -32,54 +32,66 @@ __interrupt void Port_1(void)
 {
 
     P1IFG &= ~(1 << 2);
-    if (TA1R == 0){
-        P1IES ^=  (1 << 2);
-        send(ButtonID, START_BUTT, 0);
-        TA1CCTL0 = 0x10;         // Enable counter interrupts, bit 4=1
-        TA1CTL |= 1 << 5;        //Un-pause timer
+    P1IE &= ~(1<<2);
+    P1IES ^=  (1 << 2);
+    TA1CCTL0 = 0x10;         // Enable counter interrupts, bit 4=1
+    TA1CTL |= 1 << 5;        //Un-pause timer
 
-        P1OUT ^= 0x01;
-        P4OUT |= 1;
-        P1IE &= ~(1<<2);
+
+    P1OUT ^= 0x01;
+    P4OUT |= 1;
+
+
+    if ((P1IN & (1 << 2)) != (1 << 2)) //here we can check if the button is up or down to determine the message
+        {
+            send(ProcessID, START_BUTT, BUTT_PRESSED);
+        }
+    else
+        {
+            send(ProcessID, START_BUTT, BUTT_RELEASED);
+        }
+
     }
 
-}
 
 #pragma vector = PORT2_VECTOR
 __interrupt void Port_2(void)
 {
 
     P2IFG &= ~(1 << 6);
-    if (TA1R == 0){
-        P2IES ^=  (1 << 6);
-        send(ButtonID, LAP_BUTT, 0);
-        TA1CCTL0 = 0x10;         // Enable counter interrupts, bit 4=1
-        TA1CTL |= 1 << 5;           //Un-pause timer
+    P2IE &= ~(1 << 6);
+    P2IES ^=  (1 << 6);
+    TA1CCTL0 = 0x10;         // Enable counter interrupts, bit 4=1
+    TA1CTL |= 1 << 5;           //Un-pause timer
+
+
+    if ((P2IN & (1 << 6)) != (1 << 6)) //here we can check if the button is up or down to determine the message
+        {
+            send(ProcessID, LAP_BUTT, BUTT_PRESSED);
+        }
+    else
+        {
+            send(ProcessID, LAP_BUTT, BUTT_RELEASED);
+        }
+
 
         P1OUT ^= 0x01;
         P4OUT |= 1;
         P2IE &= ~(1<<6);
     }
 
-
-;
-}
-
 #pragma vector = UNMI_VECTOR
 __interrupt void UNMI(void)
 {
 
     SFRIFG1 &= ~(1 << 4);
-    if (TA1R == 0){
-        send(ButtonID, MODE_BUTT, 0);
-        TA1CCTL0 = 0x10;         // Enable counter interrupts, bit 4=1
-        TA1CTL |= 1 << 5;           //Un-pause timer
-        P1OUT ^= 0x01;
-    }
     SFRIE1 &= ~(1 << 4);             // NMIIE - enable interrupts on NMI pins (for the reset button)
+    TA1CCTL0 = 0x10;         // Enable counter interrupts, bit 4=1
+    TA1CTL |= 1 << 5;
 
-
-}
+    send(ProcessID, MODE_BUTT, 0x00);
+    P1OUT ^= 0x01;
+    }
 
 
 
@@ -89,42 +101,10 @@ __interrupt void Timer1_A0(void) // Timer0 A0 1ms interrupt service routine
 
     TA1CCTL0 &= ~0x10;      // Stop interrupts
     TA1CTL &= ~(1 << 5);        // Pause timer
-    TA1CCTL0 = 0x01;         //Reset interrupt flag
+    TA1CCTL0 = 0x01;        //Reset interrupt flag
     TA1R = 0;               //Set timer back to 0
 
-    BYTE reader = 0;
-    reader = receive(ButtonID);
-    char ButtonType = reader & 0xC;
-    if (ButtonType == START_BUTT){
 
-        if ((P1IN & (1 << 2)) != (1 << 2)) //here we can check if the button is up or down to determine the message
-            {
-                send(ProcessID, START_BUTT, BUTT_PRESSED);
-            }
-            else
-            {
-                send(ProcessID, START_BUTT, BUTT_RELEASED);
-            }
-
-    }
-
-    if (ButtonType == LAP_BUTT){
-        P4OUT ^= 1;
-        if ((P2IN & (1 << 6)) != (1 << 6)) //here we can check if the button is up or down to determine the message
-            {
-                send(ProcessID, LAP_BUTT, BUTT_PRESSED);
-            }
-            else
-            {
-                send(ProcessID, LAP_BUTT, BUTT_RELEASED);
-            }
-        //P4OUT |= 0x01;
-    }
-    if (ButtonType == MODE_BUTT){
-        P4OUT ^= 1;
-        SFRIFG1 &= ~(1 << 4);
-        send(ProcessID, MODE_BUTT, 0x00);
-    }
     P1IE |= 1<<2 ;
     P2IE |= 1<<6 ;
     SFRIE1 |= (1 << 4);             // NMIIE - enable interrupts on NMI pins (for the reset button)
