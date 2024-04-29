@@ -9,31 +9,38 @@ void clock() {
      * Process to pick up user input and to modify behaviour accordingly.
      */
     for (;;) {
-        while (buttonEvent == 0 && time < MINUTE);
+        while (buttonEvent == 0 && time.get(time) < MINUTE) {
+            time.unlocked = 1;      // Lock hogging?
+        }
         if (startPressed == 1) {
-            if (alarmSetMode == 0 && (P1IN & (1 << START_BUTT)) == 0) {
-                monthMode = 1;
+
+            if (alarmSetMode.get(alarmSetMode) == 0 && (P1IN & (1 << START_BUTT)) == 0) {
+                monthMode.set(monthMode, 1);
             }
             else {
-                monthMode = 0;
+                monthMode.set(monthMode, 0);
             }
-            if (alarmSetMode == 1 && (P1IN & (1 << START_BUTT)) == 0) {
-                if (getTime() > alarmTime) {
-                    alarmTime = (alarmTime % DAY) + ((getTime() / DAY) + DAY);
+            alarmSetMode.unlocked = 1;
+            if (alarmSetMode.get(alarmSetMode) == 1 && (P1IN & (1 << START_BUTT)) == 0) {
+                alarmTime.unlocked = 1;
+                if (getTime() > alarmTime.get(alarmTime)) {
+                    alarmTime.set(alarmTime, (alarmTime.get(alarmTime) % DAY) + ((getTime() / DAY) + DAY));
+                    alarmTime.unlocked = 1;
                 }
                 alarmActive ^= 1;
             }
+            alarmTime.unlocked = 1;
         }
         if (lapPressed == 1) {
             if ((P2IN & (1 << LAP_BUTT)) == 0) {
-                alarmSetMode = 1;
+                alarmSetMode.set(alarmSetMode, 1);
             }
             else {
-                alarmSetMode = 0;
+                alarmSetMode.set(alarmSetMode, 1);
             }
         }
         if (modePressed == 1) {
-            alarmSetMode = 0;
+            alarmSetMode.set(alarmSetMode, 0);
             modePressed = 0;
             buttonEvent = 0;
             if ((P2IN & (1 << LAP_BUTT)) == 0) {
@@ -60,7 +67,8 @@ void timeset() {
     selectedField = 0;
     for (;;) {
         wait(&buttonEvent);
-        if (alarmSetMode == 0) {
+        if (alarmSetMode.get(alarmSetMode) == 0) {
+            alarmSetMode.unlocked = 1;
             if ((startPressed == 1) && (P1IN & (1 << START_BUTT)) == 0) {
                 timeAdv(selectedField % 5);
             }
@@ -69,11 +77,11 @@ void timeset() {
             }
             else if (modePressed == 1) {
                 modePressed =  0;
-                alarmSetMode = 1;
+                alarmSetMode.set(alarmSetMode, 1);
                 selectedField = 1;      // Start off on left-most digits
             }
         }
-        else if (alarmSetMode == 1) {
+        else if (alarmSetMode.get(alarmSetMode) == 1) {
             if ((startPressed == 1) && (P1IN & (1 << START_BUTT)) == 0) {
                 alarm_update(selectedField % 2);
             }
@@ -83,7 +91,7 @@ void timeset() {
             else if (modePressed == 1) {
                 modePressed = 0;
                 buttonEvent = 0;
-                alarmSetMode = 0;
+                alarmSetMode.set(alarmSetMode, 0);
                 STATE = CHRONO;
                 change_state();
             }
@@ -100,13 +108,16 @@ void alarmCheck() {
     for (;;) {
         while ((alarmActive == 0) & (chimeActive == 0)); // do nothing if alarms and chimes not set
         if (alarmActive == 1) {
-            if (getTime() > alarmTime) {
+            if (getTime() > alarmTime.get(alarmTime)) {
+                alarmTime.unlocked = 1;
                 currentState = STATE;
                 STATE = ALARM;
                 change_state();
             }
             if (chimeActive == 1) {
-                if ((minutes == 0) & (time < SECOND)) {
+
+                if ((minutes == 0) & (time.get(time) < SECOND)) {
+                    time.unlocked = 1;
                     currentState = STATE;
                     STATE = ALARM;
                     change_state();
@@ -121,9 +132,11 @@ void alarmRing() {
     STATE = ALARM;
     while (getTime() < sixtySeconds | buttonEvent == 0);
     buttonEvent = 0;
-    if ((lapPressed == 1) & (alarmTime > getTime())) {
-        alarmTime += MINUTE * 5; // 5 minutes snooze
+    if ((lapPressed == 1) & (alarmTime.get(alarmTime) > getTime())) {
+        alarmTime.unlocked = 1;
+        alarmTime.set(alarmTime, alarmTime.get(alarmTime) + (MINUTE * 5)); // 5 minutes snooze
     }
+    alarmTime.unlocked = 1;
     lapPressed = 0;
     modePressed = 0;
     startPressed = 0; // Just change state below to stop alarm
@@ -181,19 +194,25 @@ void update_LCD() {
            display_stopwatch();
        }
        if (STATE == CLOCK) {
-           if (alarmSetMode == 1) {
+           if (alarmSetMode.get(alarmSetMode) == 1) {
+               alarmSetMode.unlocked = 1;
                display_alarm();
            }
-           else if (monthMode == 1) {
+           else if (monthMode.get(monthMode) == 1) {
+               monthMode.unlocked = 1;
                display_month();
            }
            else {
                display_clock();
            }
+           alarmSetMode.unlocked = 1;
+           monthMode.unlocked = 1;
        }
        if (STATE == TIMESET) {
-           if (alarmSetMode == 0) {
-               if (monthMode == 0) {
+           if (alarmSetMode.get(alarmSetMode) == 0) {
+               alarmSetMode.unlocked = 1;
+               if (monthMode.get(monthMode) == 0) {
+                   monthMode.unlocked = 1;
                    display_clock();
                }
                else {
@@ -204,6 +223,8 @@ void update_LCD() {
                display_alarm();
                blink_digit(selectedField % 2);
            }
+           alarmSetMode.unlocked = 1;
+           monthMode.unlocked = 1;
        }
        if (STATE == ALARM) {
            display_alert();

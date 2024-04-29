@@ -24,6 +24,31 @@
 #define MAX_PROCESSES   3
 #define STACK_SIZE      100
 
+struct ProcessControlBlock
+{
+    LONG sp;
+    BYTE stack[STACK_SIZE];
+};
+struct ProcessControlBlock process[MAX_PROCESSES + 3];
+typedef struct ProtectedLong protectedLong;
+typedef struct ProtectedInt protectedInt;
+
+extern struct ProtectedLong {
+    LONG value;
+    char unlocked;
+    LONG (*get)(protectedLong);
+    void (*set)(protectedLong, LONG *value);
+ //   void (*increment)(struct mutex);
+};
+
+extern struct ProtectedInt {
+    unsigned int value;
+    char unlocked;
+    LONG (*get)(protectedInt);
+    void (*set)(protectedInt, int *value);
+ //   void (*increment)(struct mutex);
+};
+
 // Process prototypes
 extern void update_LCD();
 extern void stopwatch();
@@ -34,25 +59,18 @@ extern void timeset();
 extern void alarmCheck();
 extern void alarmRing();
 
-struct ProcessControlBlock
-{
-    LONG sp;
-    BYTE stack[STACK_SIZE];
-};
-struct ProcessControlBlock process[MAX_PROCESSES + 3];
-
 enum state{CLOCK, TIMESET, CHRONO, ALARM};
 static const char *days[7] = {"Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"};
 static const int monthLength[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 int STATE, currentState, newState;
 
 volatile unsigned int current_process, toggle_process;
-volatile unsigned long time, stopwatchTime, lapTime, alarmTime;
+volatile LONG stopwatchTime, lapTime;
 volatile unsigned int minutes, hours, day, date, month; // day = day of the week (out of 7), date = day of the month (out of 31)
 volatile unsigned int r;
 volatile char startPressed, lapPressed, modePressed, buttonEvent, toggle;
 volatile char alarmActive, chimeActive;
-volatile char alarmSetMode, lapMode, monthMode, stopwatchRunning, selectedField;
+volatile char lapMode, stopwatchRunning, selectedField;
 LONG status;
 LONG stack_pointer;
 LONG program_counter;
@@ -78,5 +96,12 @@ extern void setup();
 extern void show_digit(char character, char pos);
 extern void timeAdv(char field);
 extern void wait(volatile char *sema);
+extern int getInt(protectedInt mutex);
+extern void setInt(protectedInt mutex, int value);
+extern LONG getLong(protectedLong mutex);
+extern void setLong(protectedLong mutex, LONG value);
+
+protectedLong time, alarmTime;
+protectedInt alarmSetMode, monthMode;
 
 #endif

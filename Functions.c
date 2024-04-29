@@ -16,8 +16,34 @@ void wait(volatile char* s) {
     _enable_interrupts();
 }
 
+LONG getLong(protectedLong mutex) {
+    while(mutex.unlocked == 0);
+    mutex.unlocked = 0;
+    return mutex.value;
+}
+
+void setLong(protectedLong mutex, LONG value) {
+    while(mutex.unlocked == 0);
+    mutex.unlocked = 0;
+    mutex.value = value;
+    mutex.unlocked = 1;
+}
+
+int getInt(protectedInt mutex) {
+    while(mutex.unlocked == 0);
+    mutex.unlocked = 0;
+    return mutex.value;
+}
+
+void setInt(protectedInt mutex, int value) {
+    while(mutex.unlocked == 0);
+    mutex.unlocked = 0;
+    mutex.value = value;
+    mutex.unlocked = 1;
+}
+
 void clock_update() {
-    minutes += (time / MINUTE);
+    minutes += (time.get(time) / MINUTE);
     hours += (minutes / 60);
     day += (hours / 24);
     date += (hours / 24);
@@ -29,7 +55,7 @@ void clock_update() {
     date %= monthLength[month];
     month %= 12;
 
-    time %= MINUTE;
+    time.set(time, time.get(time) % MINUTE);
 }
 
 void display_stopwatch() {
@@ -77,8 +103,8 @@ void display_month() {
 }
 
 void display_alarm() {
-    int mins = (alarmTime / MINUTE) % 60;
-    int hrs = (alarmTime / HOUR) % 24;
+    int mins = (alarmTime.get(alarmTime) / MINUTE) % 60;
+    int hrs = (alarmTime.get(alarmTime) / HOUR) % 24;
     show_digit((hrs / 10), 0);
     show_digit((hrs % 10), 1);
     show_digit((mins / 10), 2);
@@ -146,17 +172,16 @@ void timeAdv(char field) {
 
 void alarm_update(char field) {
     if (field == 0) {          // field 0 = minutes
-        alarmTime += MINUTE;
+        alarmTime.set(alarmTime, alarmTime.get(alarmTime) + MINUTE);
+        alarmTime.unlocked = 1;
     } else if (field == 1) {   // field 1 = hours
-        alarmTime += HOUR;
+        alarmTime.set(alarmTime, alarmTime.get(alarmTime) + HOUR);
+        alarmTime.unlocked = 1;
     }
 }
 
 long getTime() {
-    int mins = 60 * 1000;
-    int hrs = 60 * mins;
-    int dys = 24 * hrs;
-    long longTime = (time + (minutes * mins) + (hours * hrs) + (date * dys));
+    long longTime = (time.get(time) + (minutes * MINUTE) + (hours * HOUR) + (date * DAY));
     return longTime;
 }
 
@@ -272,9 +297,15 @@ void setup() {
 
     // initialise global variables to 0
 
-    currentState, current_process, stopwatchTime, lapTime, alarmTime, time, minutes, day, date,\
+    currentState, current_process, stopwatchTime, lapTime, minutes, day, date,\
     month, startPressed, lapPressed, modePressed, buttonEvent, alarmActive, chimeActive,\
-    alarmSetMode, lapMode, monthMode, stopwatchRunning, selectedField = 0;
+    lapMode, stopwatchRunning = 0;
     STATE = CLOCK;
     hours = 12; // start off at 12:00
+
+    time.unlocked, alarmTime.unlocked, alarmSetMode.unlocked, monthMode.unlocked = 1;
+    time.get, alarmTime.get = getLong;
+    time.set, alarmTime.set = setLong;
+    alarmSetMode.get, monthMode.get = getInt;
+    alarmSetMode.set, monthMode.set = setInt;
 }

@@ -108,11 +108,9 @@ __interrupt void Timer0_A0 (void)    // Timer0 A0 1ms interrupt service routine
     );
     if (stopwatchRunning == 1) {
         stopwatchTime++;
-        time++;
     }
-    else {
-        time++;
-    }
+    time.set(time, time.get(time) + 1);
+    time.unlocked = 1;
 }
 
 int main(void)

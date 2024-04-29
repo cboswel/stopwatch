@@ -135,15 +135,17 @@ void colons(char shape[2], char pos) {
  *  represent the digits, and so must be added after the sequence is set.
 **/
     if (pos == 1) {
-        if (monthMode == 0) {
+        if (monthMode.get(monthMode) == 0) {
             shape[1] |= 0b00000100; // add a colon
         }
         else {
             shape[1] |= 0b00000001; // add a decimal point
         }
+        monthMode.unlocked = 1;
     }
     if (pos == 3) {
-        if (monthMode == 1) {
+        if (monthMode.get(monthMode) == 1) {
+            monthMode.unlocked = 1;
             shape[1] |= 0b00000001; // add a decimal point
         }
         else if (STATE == CHRONO || lapMode == 1) {
