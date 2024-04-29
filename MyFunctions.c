@@ -100,13 +100,13 @@ void display_stopwatch() {
     /**
      * Displays the stopwatch view: Minutes, seconds, milliseconds.
      */
-    int ms = stopwatchTime % 1000;
-    int s = (stopwatchTime / 1000) % 60;
-    int min = (stopwatchTime / (1000 * 60)) % 60;
+    int ms = stopwatchTime % SECOND;
+    int s = (stopwatchTime / SECOND) % 60;
+    int min = (stopwatchTime / MINUTE) % 60;
     if (lapMode == 1) {
-        ms = lapTime % 1000;
-        s = (lapTime / 1000) % 60;
-        min = (lapTime / (1000 * 60)) % 60;
+        ms = lapTime % SECOND;
+        s = (lapTime / SECOND) % 60;
+        min = (lapTime / MINUTE) % 60;
     }
     show_digit((min / 10), 0);
     show_digit((min % 10), 1);
@@ -201,10 +201,10 @@ void timeAdv(char field) {
         day++;
     }
     if (field == 3) {
-        date++;
+        month++;
     }
     if (field == 4) {
-        month++;
+        date++;
     }
 }
 
@@ -217,10 +217,7 @@ void alarm_update(char field) {
 }
 
 long getTime() {
-    int mins = 60 * 1000;
-    int hrs = 60 * mins;
-    int dys = 24 * hrs;
-    long longTime = (time + (minutes * mins) + (hours * hrs) + (date * dys));
+    long longTime = (time + (minutes * MINUTE) + (hours * HOUR) + (date * DAY));
     return longTime;
 }
 

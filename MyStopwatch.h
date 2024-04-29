@@ -98,6 +98,4 @@ extern void timeAdv(char field);
 extern void send(BYTE Recipitent, BYTE ButtonType, BYTE ButtonState);
 extern BYTE receive(BYTE RecipitentID);
 
-
-
 #endif

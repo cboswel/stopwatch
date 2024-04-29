@@ -85,6 +85,11 @@ void timeset() {
             }
             if (ButtonAddress == LAP_BUTT && ButtonState == BUTT_PRESSED) {
                 selectedField++;
+                if ((selectedField % 5) < 3) {
+                    monthMode = 0;
+                } else {
+                    monthMode = 1;
+                }
             } else if (ButtonAddress == MODE_BUTT) {
                 alarmSetMode = 1;
                 selectedField = 1; // Start off on left-most digits
@@ -176,8 +181,10 @@ void stopwatch() {
         if (modePressed == 1) {
             ButtonAddress = 0; // Clear message variables
             ButtonState = 0;
+            /**
             STATE = TIMESET; // If lap button not also pressed, enter Timeset
             change_state(); // Update state
+            **/
             stopwatchRunning = 0;
             STATE = CLOCK;
             change_state();

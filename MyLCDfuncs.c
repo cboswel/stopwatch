@@ -22,7 +22,7 @@ void LCD_init() {
   //Also of interest: LCDDIVx and LCDSSEL for clocked blinking
 
   // LCD Operation - Mode 3, internal 3.02v, charge pump 256Hz
-  LCDVCTL |= (0b11110111101 << 5); // 3.02 V, 256 Hz, Charge Pump on, Internal Ref on R13 Enabled, R33 internally connected
+  LCDVCTL |= (0b11110111101); // 3.02 V, 256 Hz, Charge Pump on, Internal Ref on R13 Enabled, R33 internally connected
 
   // Clear LCD memory
   LCDMEMCTL |= (1 << 1); // LCDCLRM - clear LCD memory buffer
@@ -41,10 +41,10 @@ void char_to_digit(char character, char shape[2]) {
    * Big map containing the binary sequences used to determine which LCD segments to
    * light up for all the required characters
    **/
-  if (character == '9' || character == '\9') { // For convenience: int 9 == char '\9' so we can send ints as input
+  if (character == '9' || character == '\t') { // For convenience: int 9 == char '\9' so we can send ints as input
     shape[0] = 0b11110111;
     shape[1] = 0b00000000;
-  } else if (character == '8' || character == '\8') {
+  } else if (character == '8' || character == '\b') {
     shape[0] = 0b11111111;
     shape[1] = 0b00000000;
   } else if (character == '7' || character == '\7') {

@@ -175,6 +175,5 @@ int main(void)
     // and count UP to create a 1ms interrupt
     run_process(0);
     _BIS_SR(GIE); // interrupts enabled
-    for (;;)
-        ;
+    for (;;);
 }
