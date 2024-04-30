@@ -66,6 +66,11 @@ void timeset() {
             }
             if ((lapPressed == 1) && (P2IN & (1 << LAP_BUTT)) == 0) {
                 selectedField++;
+                if ((selectedField % 5) < 3) {
+                    monthMode = 0;
+                } else {
+                    monthMode = 1;
+                }
             }
             else if (modePressed == 1) {
                 modePressed =  0;

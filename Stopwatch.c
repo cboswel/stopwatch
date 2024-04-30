@@ -55,7 +55,6 @@ __interrupt void Port_2(void)
     _enable_interrupts();
 }
 
-
 #pragma vector=UNMI_VECTOR
 /**
  * ISR for the MODE button on the RST button.
@@ -108,11 +107,8 @@ __interrupt void Timer0_A0 (void)    // Timer0 A0 1ms interrupt service routine
     );
     if (stopwatchRunning == 1) {
         stopwatchTime++;
-        time++;
     }
-    else {
-        time++;
-    }
+    time++;
 }
 
 int main(void)

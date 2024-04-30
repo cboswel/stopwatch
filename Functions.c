@@ -18,15 +18,14 @@ void wait(volatile char* s) {
 
 void clock_update() {
     minutes += (time / MINUTE);
-    hours += (minutes / 60);
-    day += (hours / 24);
-    date += (hours / 24);
-    month += (day / monthLength[month]);
-
     minutes %= 60;
+    hours += (time / HOUR);
     hours %= 24;
+    day += (time / DAY);
     day %= 7;
+    date += (time / DAY);
     date %= monthLength[month];
+    month += (date / monthLength[month]);
     month %= 12;
 
     time %= MINUTE;
@@ -36,13 +35,13 @@ void display_stopwatch() {
     /**
      * Displays the stopwatch view: Minutes, seconds, milliseconds.
      */
-    int ms = stopwatchTime % 1000;
-    int s = (stopwatchTime / 1000) % 60;
-    int min = (stopwatchTime / (1000 * 60)) % 60;
+    int ms = stopwatchTime % SECOND;
+    int s = (stopwatchTime / SECOND) % 60;
+    int min = (stopwatchTime / MINUTE) % 60;
     if (lapMode == 1) {
-        ms = lapTime % 1000;
-        s = (lapTime / 1000) % 60;
-        min = (lapTime / (1000 * 60)) % 60;
+        ms = lapTime % SECOND;
+        s = (lapTime / SECOND) % 60;
+        min = (lapTime / MINUTE) % 60;
     }
     show_digit((min / 10), 0);
     show_digit((min % 10), 1);
@@ -70,8 +69,8 @@ void display_month() {
      */
     show_digit(((date + 1) / 10), 0);    // +1 because of zero indexing
     show_digit(((date + 1) % 10), 1);
-    show_digit((month + 1 / 10), 2);
-    show_digit((month + 1 % 10), 3);
+    show_digit(((month + 1) / 10), 2);
+    show_digit(((month + 1) % 10), 3);
     show_digit(days[day][0], 4);
     show_digit(days[day][1], 5);
 }
@@ -137,10 +136,10 @@ void timeAdv(char field) {
         day++;
     }
     if (field == 3) {
-        date++;
+        month++;
     }
     if (field == 4) {
-        month++;
+        date++;
     }
 }
 

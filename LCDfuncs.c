@@ -41,11 +41,11 @@ void char_to_digit(char character, char shape[2]) {
  * Big map containing the binary sequences used to determine which LCD segments to
  * light up for all the required characters
 **/
-    if (character == '9' || character == '\9') {  // For convenience: int 9 == char '\9' so we can send ints as input
+    if (character == '9' || character == '\t') {  // For convenience: int 9 == char '\9' so we can send ints as input
         shape[0] = 0b11110111;
         shape[1] = 0b00000000;
     }
-    else if (character == '8' || character == '\8') {
+    else if (character == '8' || character == '\b') {
         shape[0] = 0b11111111;
         shape[1] = 0b00000000;
     }
@@ -211,7 +211,7 @@ void show_digit(char character, char pos) {
     set_digit(shape, pos);           // Fill out the LCDM registers to display the digit
 }
 
-void blink_digit(char selectedField) {
+void blink_digit(char selection) {
     /**
      * Function to blink a pair of digits on the LCD screen.
      * The argument is a "field". When the time is set, the selected
@@ -226,7 +226,7 @@ void blink_digit(char selectedField) {
      * as above.
      */
 
-    selectedField %= 3; // The pattern is middle, left, right, middle, left, right. Saves repeating code.
+    selection %= 3; // The pattern is middle, left, right, middle, left, right. Saves repeating code.
 
     // Set all blinking memory registers to the same as the normal register
     LCDBM4 = LCDM4;
@@ -243,19 +243,19 @@ void blink_digit(char selectedField) {
     LCDBM19 = LCDM19;
 
     // Make one of them blink by setting the blinking register to "--"
-    if (selectedField == 0) {
+    if (selection == 0) {
         LCDBM8 = 0b11;
         LCDBM9 = 0;
         LCDBM10 = 0b11;
         LCDBM11 = 0;
     }
-    else if (selectedField == 1) {
+    else if (selection == 1) {
         LCDBM4 = 0b11;
         LCDBM5 = 0;
         LCDBM6 = 0b11;
         LCDBM7 = 0;
     }
-    else if (selectedField == 2) {
+    else if (selection == 2) {
         LCDBM2 = 0b11;
         LCDBM3 = 0;
         LCDBM18 = 0b11;
