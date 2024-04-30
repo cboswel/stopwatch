@@ -37,7 +37,6 @@ __interrupt void Port_1(void)
     TA1CCTL0 = 0x10;         // Enable counter interrupts, bit 4=1
     TA1CTL |= 1 << 5;        //Un-pause timer
 
-
     P1OUT ^= 0x01;
     P4OUT |= 1;
 
@@ -148,15 +147,10 @@ __interrupt void Timer0_A0(void) // Timer0 A0 1ms interrupt service routine
             " pop.a R9 \n"
             " pop.a R10 \n"
     );
-    if (stopwatchRunning == 1)
-    {
+    if (stopwatchRunning == 1) {
         stopwatchTime++;
-        time++;
     }
-    else
-    {
-        time++;
-    }
+    time++;
     _enable_interrupts();
 }
 

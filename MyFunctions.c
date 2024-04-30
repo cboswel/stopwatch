@@ -134,8 +134,8 @@ void display_month() {
      */
     show_digit(((date + 1) / 10), 0);    // +1 because of zero indexing
     show_digit(((date + 1) % 10), 1);
-    show_digit((month + 1 / 10), 2);
-    show_digit((month + 1 % 10), 3);
+    show_digit(((month + 1) / 10), 2);
+    show_digit(((month + 1) % 10), 3);
     show_digit(days[day][0], 4);
     show_digit(days[day][1], 5);
 }

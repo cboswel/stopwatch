@@ -178,7 +178,7 @@ void stopwatch() {
                 prevTime = stopwatchTime;
             }
         }
-        if (modePressed == 1) {
+        if (ButtonAddress == MODE_BUTT) {
             ButtonAddress = 0; // Clear message variables
             ButtonState = 0;
             /**

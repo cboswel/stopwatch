@@ -62,7 +62,7 @@ static const int monthLength[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30,
                                      31 };
 int STATE, currentState, newState;
 
-volatile int buffer;/////
+volatile int buffer;
 
 volatile unsigned int current_process, toggle_process;
 volatile unsigned long time, stopwatchTime, lapTime, alarmTime;
