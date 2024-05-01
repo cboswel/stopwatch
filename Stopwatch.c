@@ -40,9 +40,9 @@ __interrupt void Port_1(void) {
 
     if ((P1IN & (1 << 2)) != (1 << 2)) {
     //here we can check if the button is up or down to determine the message
-        send(ProcessID, START_BUTT, BUTT_PRESSED);
+        send(ProcessID, MODE_BUTT, BUTT_PRESSED);
     } else {
-        send(ProcessID, START_BUTT, BUTT_RELEASED);
+      //  send(ProcessID, START_BUTT, BUTT_RELEASED);
     }
 }
 
@@ -100,16 +100,19 @@ __interrupt void Timer0_A0(void) {
             " push.a R3\n"
             " movx.a sp,&stack_pointer\n"
     );
-    // instead of this lot, we would equally swap between processes. Each process would check the mailbox for permission to run
-    process[toggle_process].sp = stack_pointer; //toggle = current, current = offset;
-    current_process = (current_process + 1) % MAX_PROCESSES;
-    toggle_process = current_process;
-    if (current_process == 2)
-    {
-        toggle_process += STATE;
-    }
-    stack_pointer = process[toggle_process].sp;
 
+    process[current_process].sp = stack_pointer;
+    // process scheduling
+    process_slot = (process_slot + 1) % MAX_PROCESSES;
+    // The slot changes every cycle
+    current_process = process_slot;
+    if (process_slot == 2) {
+    // The final slot can relate to different process
+        current_process += STATE;
+        // STATE is an enum, so each state corresponds with an integer value
+    }
+
+    stack_pointer = process[current_process].sp;
     asm(
             " movx.a &stack_pointer,SP \n"
             " pop.a R3 \n"

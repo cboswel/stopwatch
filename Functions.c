@@ -350,6 +350,31 @@ long get_time() {
 
 /*F ----------------------------------------------------------------------------
  *
+    NAME :      process_scheduler()
+
+  DESCRIPTION : Selects the next process to run. Cycles through 3 slots, the
+                final slot depends on the operating mode
+
+  INPUTS :    - the process slot and the state (global variables)
+
+  RETURNS :   void
+
+  PROCESS :
+              [1] Cycle through the three process slots
+              [2] If on the third slot, set to the required process
+ *
+ *F ----------------------------------------------------------------------------*/
+
+void process_scheduler() {
+    process_slot = (process_slot + 1) % MAX_PROCESSES;
+    current_process = process_slot;
+    if (process_slot == 2) {
+        current_process += STATE;
+    }
+}
+
+/*F ----------------------------------------------------------------------------
+ *
     NAME :     initialise_process(unsigned int, *funct)
 
   DESCRIPTION : Sets up a PCB with a program counter and function pointer
@@ -515,7 +540,7 @@ void setup() {
 
     // initialise global variables to 0
 
-    currentState, current_process, stopwatchTime, lapTime, alarmTime, time, \
+    currentState, current_process, process_slot, stopwatchTime, lapTime, alarmTime, time, \
             minutes, day, date, month, alarmActive, chimeActive, alarmSetMode, \
             lapMode, monthMode, stopwatchRunning, selectedField = 0;
     STATE = CLOCK;

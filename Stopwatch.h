@@ -59,7 +59,7 @@ int STATE, currentState;
 
 volatile int buffer;
 
-volatile unsigned int current_process, toggle_process;
+volatile unsigned int current_process, process_slot;
 volatile unsigned long time, stopwatchTime, lapTime, alarmTime, sixtySeconds;
 volatile unsigned int minutes, hours, day, date, month;
 //day = day of the week (out of 7), date = day of the month (out of 31)
@@ -87,11 +87,12 @@ extern long get_time();
 extern void initialise_process(unsigned int process_index, void (*funct)());
 extern void LCD_extras();
 extern void LCD_init();
+extern void process_scheduler();
+extern BYTE receive(BYTE RecipitentID);
 extern void run_process(unsigned int process_index);
+extern void send(BYTE Recipitent, BYTE ButtonType, BYTE ButtonState);
 extern void setup();
 extern void show_digit(char character, char pos);
 extern void time_adv(char field);
-extern void send(BYTE Recipitent, BYTE ButtonType, BYTE ButtonState);
-extern BYTE receive(BYTE RecipitentID);
 
 #endif
