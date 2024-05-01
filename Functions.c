@@ -237,9 +237,8 @@ void display_alert() {
     show_digit('!', 5);
 
     // blink the entire display
-    blink_digit(0);
-    blink_digit(1);
-    blink_digit(2);
+    blink_digit(ALL);
+    // ALL is a #defined integer to blink the entire display
 }
 
 /*F ----------------------------------------------------------------------------
@@ -517,11 +516,9 @@ void setup() {
     // initialise global variables to 0
 
     currentState, current_process, stopwatchTime, lapTime, alarmTime, time, \
-            minutes, day, date, month, startPressed, lapPressed, modePressed, \
-            buttonEvent, alarmActive, chimeActive, alarmSetMode, lapMode, \
-            monthMode, stopwatchRunning, selectedField = 0;
+            minutes, day, date, month, alarmActive, chimeActive, alarmSetMode, \
+            lapMode, monthMode, stopwatchRunning, selectedField = 0;
     STATE = CLOCK;
     hours = 12;  // start off at 12:00
     alarmTime = MINUTE + (12 * HOUR);
-    alarmActive = 1;
 }

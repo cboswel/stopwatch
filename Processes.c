@@ -171,16 +171,20 @@ void alarm_check() {
         if (alarmActive == 1) {
             if (get_time() > alarmTime) {
             // if alarm time has expired go to alarm state
+                alarmActive = 0;
                 currentState = STATE;  // Save current state first to return to
                 STATE = ALARM;
+                alarmTime += DAY;
+                sixtySeconds = get_time() + MINUTE;
                 change_state();
             }
             if (chimeActive == 1) {
                 if ((minutes == 0) & (time < SECOND)) {
                 // if it's the first second of a new minute, go to alarm state
+                    alarmActive = 0;
                     currentState = STATE;
-                    sixtySeconds = get_time() + MINUTE;
                     STATE = ALARM;
+                    sixtySeconds = get_time() + MINUTE;
                     change_state();
                 }
             }
@@ -206,18 +210,22 @@ void alarm_check() {
  *F ----------------------------------------------------------------------------*/
 
 void alarm_ring() {
+    BYTE msg;
     for (;;) {
         do {
             msg = receive(ProcessID);  // Get msg from mailbox
         } while ((msg == EMPTY) && (get_time() < sixtySeconds));
 	// Do nothing for 60 secs if there is no button press
 	// Any button press will cancel the alarm
-    if ((msg & 0xC) == LAP_BUTT) {
+        if ((msg & 0xC) == LAP_BUTT) {
         // Lap button snoozes the alarm for 5 mins
-        alarmTime += (MINUTE * 5); // 5 minutes snooze
-    }
+            alarmTime += (MINUTE * 5); // 5 minutes snooze
+        }
     // regardless of how we got here, button or timeout, return to prev state
-    STATE = currentState;
+        alarmActive = 1;
+        STATE = currentState;
+        change_state();
+    }
 }
 
 /*F ----------------------------------------------------------------------------

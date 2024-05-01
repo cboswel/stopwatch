@@ -21,6 +21,7 @@
 
 #define RLED 0
 #define GLED 0
+#define ALL 9
 #define SECOND 1000
 #define MINUTE 60000
 #define HOUR 3600000
@@ -59,7 +60,7 @@ int STATE, currentState;
 volatile int buffer;
 
 volatile unsigned int current_process, toggle_process;
-volatile unsigned long time, stopwatchTime, lapTime, alarmTime;
+volatile unsigned long time, stopwatchTime, lapTime, alarmTime, sixtySeconds;
 volatile unsigned int minutes, hours, day, date, month;
 //day = day of the week (out of 7), date = day of the month (out of 31)
 volatile char alarmActive, chimeActive;

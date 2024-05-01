@@ -9,20 +9,20 @@ void LCD_init() {
    *  Setup code to initialise the LCD. Runs once.
    */
 
-  LCDPCTL0 = 0b1111111111111111; //
-  LCDPCTL1 = 0b0000011111111111; // Pins L27 - L35 not required, and L30 in fact needs
-  LCDPCTL2 = 0b1111111111110000; // to be deactivated to free up the switch on P2.6
+  LCDPCTL0 = 0b1111111111111111;  //
+  LCDPCTL1 = 0b0000011111111111;  // Pins L27 - L35 not required, and L30 in fact needs
+  LCDPCTL2 = 0b1111111111110000;  // to be deactivated to free up the switch on P2.6
 
-  LCDCSSEL0 = 0b1111; // 0 - 3 are COM
+  LCDCSSEL0 = 0b1111;  // 0 - 3 are COM
 
-  LCDCTL0 |= (1 << 2); // LCDSON - turn segments on
-  LCDCTL0 |= (0b011 << 3); // LCDMXx - Set 4 mux mode as per datasheet
-  LCDBLKCTL = 0b1000; // Prescalar = 16, blinking off. Alternating blink mode = 0b11
-
-  //Also of interest: LCDDIVx and LCDSSEL for clocked blinking
+  LCDCTL0 |= (1 << 2);  // LCDSON - turn segments on
+  LCDCTL0 |= (0b011 << 3);  // LCDMXx - Set 4 mux mode as per datasheet
+  LCDBLKCTL = 0b1000; 
+  // Prescalar = 16, blinking off. Alternating blink mode = 0b11
 
   // LCD Operation - Mode 3, internal 3.02v, charge pump 256Hz
-  LCDVCTL |= (0b11110111101); // 3.02 V, 256 Hz, Charge Pump on, Internal Ref on R13 Enabled, R33 internally connected
+  LCDVCTL |= (0b11110111101);
+  // 3.02 V, 256 Hz, Charge Pump on, Internal Ref on R13 Enabled, R33 internally connected
 
   // Clear LCD memory
   LCDMEMCTL |= (1 << 1); // LCDCLRM - clear LCD memory buffer
@@ -41,7 +41,8 @@ void char_to_digit(char character, char shape[2]) {
    * Big map containing the binary sequences used to determine which LCD segments to
    * light up for all the required characters
    **/
-  if (character == '9' || character == '\t') { // For convenience: int 9 == char '\9' so we can send ints as input
+  if (character == '9' || character == '\t') { 
+  // For convenience: int 9 == char '\t' so we can send ints as input
     shape[0] = 0b11110111;
     shape[1] = 0b00000000;
   } else if (character == '8' || character == '\b') {
@@ -107,6 +108,20 @@ void char_to_digit(char character, char shape[2]) {
     shape[0] = 0b00011010;
     shape[1] = 0b00010000;
   }
+  // ALARM!
+  else if (character == 'A') {
+    shape[0] = 0b11101111;
+    shape[1] = 0b00000000;
+  } else if (character == 'L') {
+    shape[0] = 0b00011100;
+    shape[1] = 0b00000000;
+  } else if (character == 'R') {
+    shape[0] = 0b11001111;
+    shape[1] = 0b00001000;
+  } else if (character == '!') {
+    shape[0] = 0b00000011;
+    shape[1] = 0b11111100;
+  }
 }
 
 void colons(char shape[2], char pos) {
@@ -117,17 +132,20 @@ void colons(char shape[2], char pos) {
    **/
   if (pos == 1) {
     if (monthMode == 0) {
-      shape[1] |= 0b00000100; // add a colon
+      shape[1] |= 0b00000100;  // add a colon
     } else {
-      shape[1] |= 0b00000001; // add a decimal point
+      shape[1] |= 0b00000001;  // add a decimal point
     }
   }
   if (pos == 3) {
     if (monthMode == 1) {
-      shape[1] |= 0b00000001; // add a decimal point
+      shape[1] |= 0b00000001;  // add a decimal point
     } else if (STATE == CHRONO || lapMode == 1) {
-      shape[1] |= 0b00000100; // add a colon
+      shape[1] |= 0b00000100;  // add a colon
     }
+  }
+  if (STATE == ALARM) {
+      shape[1] &= ~(1 << 2);  // remove colon in ALARM message
   }
 }
 
@@ -177,16 +195,13 @@ void show_digit(char character, char pos) {
    *  Input arguments: The character to display and a position
    *  indicating on which of the 6 14-seg displays to show it.
    **/
-  char shape[2] = {
-    0,
-    0
-  }; // Pair of binary numbers to hold the pattern for the digit
+  char shape[2] = {0,0}; // Pair of binary numbers to hold the pattern for the digit
   char_to_digit(character, shape); // Fill out binary numbers with pattern for given digit
   colons(shape, pos); // Add any colons or decimal points if required
   set_digit(shape, pos); // Fill out the LCDM registers to display the digit
 }
 
-void blink_digit(char selectedField) {
+void blink_digit(char field) {
   /**
    * Function to blink a pair of digits on the LCD screen.
    * The argument is a "field". When the time is set, the selected
@@ -200,8 +215,6 @@ void blink_digit(char selectedField) {
    * When alarm is being set, it alternates between minutes and hours
    * as above.
    */
-
-  selectedField %= 3; // The pattern is middle, left, right, middle, left, right. Saves repeating code.
 
   // Set all blinking memory registers to the same as the normal register
   LCDBM4 = LCDM4;
@@ -218,17 +231,30 @@ void blink_digit(char selectedField) {
   LCDBM19 = LCDM19;
 
   // Make one of them blink by setting the blinking register to "--"
-  if (selectedField == 0) {
+  if (field == 0) {
     LCDBM8 = 0b11;
     LCDBM9 = 0;
     LCDBM10 = 0b11;
     LCDBM11 = 0;
-  } else if (selectedField == 1) {
+  } else if (field == 1) {
     LCDBM4 = 0b11;
     LCDBM5 = 0;
     LCDBM6 = 0b11;
     LCDBM7 = 0;
-  } else if (selectedField == 2) {
+  } else if (field == 2) {
+    LCDBM2 = 0b11;
+    LCDBM3 = 0;
+    LCDBM18 = 0b11;
+    LCDBM19 = 0;
+  } else if (field == ALL) {
+    LCDBM8 = 0b11;
+    LCDBM9 = 0;
+    LCDBM10 = 0b11;
+    LCDBM11 = 0;
+    LCDBM4 = 0b11;
+    LCDBM5 = 0;
+    LCDBM6 = 0b11;
+    LCDBM7 = 0;
     LCDBM2 = 0b11;
     LCDBM3 = 0;
     LCDBM18 = 0b11;
