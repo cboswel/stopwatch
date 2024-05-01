@@ -117,7 +117,7 @@ void char_to_digit(char character, char shape[2]) {
     shape[1] = 0b00000000;
   } else if (character == 'R') {
     shape[0] = 0b11001111;
-    shape[1] = 0b00001000;
+    shape[1] = 0b00010000;
   } else if (character == '!') {
     shape[0] = 0b00000011;
     shape[1] = 0b11111100;
