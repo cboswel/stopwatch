@@ -4,20 +4,20 @@
  * variables.
  */
 
-#ifndef STOPWATCH_H
-#define STOPWATCH_H
+#ifndef STOPWATCH_STOPWATCH_H_
+#define STOPWATCH_STOPWATCH_H_
 
 #include <msp430.h>
 
 #define EMPTY 0
-#define START_BUTT 4    //0100
-#define LAP_BUTT 8      //1000
-#define MODE_BUTT 0xC    //1100
+#define START_BUTT 4    // 0100
+#define LAP_BUTT 8      // 1000
+#define MODE_BUTT 0xC    // 1100
 #define BYTE unsigned char
-#define BUTT_PRESSED 1  //0001
-#define BUTT_RELEASED 2   //0010
-#define ButtonID 2        //0010
-#define ProcessID 1       //0001
+#define BUTT_PRESSED 1  // 0001
+#define BUTT_RELEASED 2   // 0010
+#define ButtonID 2        // 0010
+#define ProcessID 1       // 0001
 
 #define RLED 0
 #define GLED 0
@@ -41,20 +41,18 @@ extern void timeset();
 extern void alarm_check();
 extern void alarm_ring();
 
-struct ProcessControlBlock
-{
+struct ProcessControlBlock {
     LONG sp;
     BYTE stack[STACK_SIZE];
 };
 struct ProcessControlBlock process[MAX_PROCESSES + 3];
 
-enum state
-{
+enum state {
     CLOCK, TIMESET, CHRONO, ALARM
 };
 static const char *days[7] = { "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su" };
-static const int monthLength[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31,\
-	30, 31 };
+static const int monthLength[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, \
+                                     30, 31 };
 int STATE, currentState;
 
 volatile int buffer;
@@ -62,7 +60,7 @@ volatile int buffer;
 volatile unsigned int current_process, process_slot;
 volatile unsigned long time, stopwatchTime, lapTime, alarmTime, sixtySeconds;
 volatile unsigned int minutes, hours, day, date, month;
-//day = day of the week (out of 7), date = day of the month (out of 31)
+// day = day of the week (out of 7), date = day of the month (out of 31)
 volatile char alarmActive, chimeActive;
 volatile char alarmSetMode, lapMode, monthMode, stopwatchRunning, selectedField;
 LONG status;
@@ -72,7 +70,7 @@ LONG saved_sp;
 WORD pc1;
 WORD pc2;
 
-//Misc function prototypes
+// Misc function prototypes
 
 extern void alarm_update(char field);
 extern void blink_digit(char field);
@@ -95,4 +93,4 @@ extern void setup();
 extern void show_digit(char character, char pos);
 extern void time_adv(char field);
 
-#endif
+#endif  // STOPWATCH_STOPWATCH_H_

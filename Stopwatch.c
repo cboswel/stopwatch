@@ -21,8 +21,7 @@
 #pragma vector = TIMER1_A1_VECTOR
 #pragma vector = TIMER0_A1_VECTOR
 #pragma vector = WDT_VECTOR
-__interrupt void UNUSED_HWI_ISR(void)
-{
+__interrupt void UNUSED_HWI_ISR(void) {
     __no_operation();
 }
 
@@ -33,16 +32,16 @@ __interrupt void Port_1(void) {
     P1IE &= ~(1<<2);
     P1IES ^=  (1 << 2);
     TA1CCTL0 = 0x10;         // Enable counter interrupts, bit 4=1
-    TA1CTL |= 1 << 5;        //Un-pause timer
+    TA1CTL |= 1 << 5;        // Un-pause timer
 
     P1OUT ^= 0x01;
     P4OUT |= 1;
 
     if ((P1IN & (1 << 2)) != (1 << 2)) {
-    //here we can check if the button is up or down to determine the message
+    // here we can check if the button is up or down to determine the message
         send(ProcessID, MODE_BUTT, BUTT_PRESSED);
     } else {
-      //  send(ProcessID, START_BUTT, BUTT_RELEASED);
+      // send(ProcessID, START_BUTT, BUTT_RELEASED);
     }
 }
 
@@ -52,9 +51,10 @@ __interrupt void Port_2(void) {
     P2IE &= ~(1 << 6);
     P2IES ^=  (1 << 6);
     TA1CCTL0 = 0x10;         // Enable counter interrupts, bit 4=1
-    TA1CTL |= 1 << 5;           //Un-pause timer
+    TA1CTL |= 1 << 5;        // Un-pause timer
 
-    if ((P2IN & (1 << 6)) != (1 << 6)) { //here we can check if the button is up or down to determine the message
+    if ((P2IN & (1 << 6)) != (1 << 6)) {
+    // here we can check if the button is up or down to determine the message
         send(ProcessID, LAP_BUTT, BUTT_PRESSED);
     } else {
         send(ProcessID, LAP_BUTT, BUTT_RELEASED);
@@ -76,12 +76,12 @@ __interrupt void Timer1_A0(void) {
     // Timer0 A0 1ms interrupt service routine
     TA1CCTL0 &= ~0x10;      // Stop interrupts
     TA1CTL &= ~(1 << 5);        // Pause timer
-    TA1CCTL0 = 0x01;        //Reset interrupt flag
-    TA1R = 0;               //Set timer back to 0
+    TA1CCTL0 = 0x01;        // Reset interrupt flag
+    TA1R = 0;               // Set timer back to 0
 
-    P1IE |= 1<<2 ;
-    P2IE |= 1<<6 ;
-    SFRIE1 |= (1 << 4);             // NMIIE - enable interrupts on NMI pins (for the reset button)
+    P1IE |= (1 << 2);
+    P2IE |= (1 << 6);
+    // NMIIE - enable interrupts on NMI pins (for the reset button)
 }
 
 #pragma vector = TIMER0_A0_VECTOR
@@ -141,9 +141,10 @@ int main(void) {
     initialise_process(4, stopwatch);
     initialise_process(5, alarm_ring);
     TA0CCTL0 = 0x10;  // Enable counter interrupts, bit 4=1
-    TA0CTL = TASSEL_2 + MC_1;  // Timer A using subsystem master clock, SMCLK(1.1 MHz)
+    TA0CTL = TASSEL_2 + MC_1;
+    // Timer A using subsystem master clock, SMCLK(1.1 MHz)
     // and count UP to create a 1ms interrupt
     run_process(0);
-    _BIS_SR(GIE); // interrupts enabled
+    _BIS_SR(GIE);  // interrupts enabled
     for (;;);
 }

@@ -9,24 +9,27 @@ void LCD_init() {
    *  Setup code to initialise the LCD. Runs once.
    */
 
-  LCDPCTL0 = 0b1111111111111111;  //
-  LCDPCTL1 = 0b0000011111111111;  // Pins L27 - L35 not required, and L30 in fact needs
-  LCDPCTL2 = 0b1111111111110000;  // to be deactivated to free up the switch on P2.6
+  LCDPCTL0 = 0b1111111111111111;
+  LCDPCTL1 = 0b0000011111111111;
+  LCDPCTL2 = 0b1111111111110000;
+  // Pins L27 - L35 not required, and L30 in fact need
+  // to be deactivated to free up the switch on P2.6
 
   LCDCSSEL0 = 0b1111;  // 0 - 3 are COM
 
   LCDCTL0 |= (1 << 2);  // LCDSON - turn segments on
   LCDCTL0 |= (0b011 << 3);  // LCDMXx - Set 4 mux mode as per datasheet
-  LCDBLKCTL = 0b1000; 
+  LCDBLKCTL = 0b1000;
   // Prescalar = 16, blinking off. Alternating blink mode = 0b11
 
   // LCD Operation - Mode 3, internal 3.02v, charge pump 256Hz
   LCDVCTL |= (0b11110111101);
-  // 3.02 V, 256 Hz, Charge Pump on, Internal Ref on R13 Enabled, R33 internally connected
+  // 3.02 V, 256 Hz, Charge Pump on, Internal Ref on R13 Enabled,
+  // R33 internally connected
 
   // Clear LCD memory
-  LCDMEMCTL |= (1 << 1); // LCDCLRM - clear LCD memory buffer
-  LCDCTL0 |= 1; // LCDON - turn on the power!
+  LCDMEMCTL |= (1 << 1);  // LCDCLRM - clear LCD memory buffer
+  LCDCTL0 |= 1;  // LCDON - turn on the power!
 
   // set Comm pins as per page 13 https://www.ti.com/lit/ug/slau595b/slau595b.pdf?ts=1709648945332&ref_url=https%253A%252F%252Fwww.ecosia.org%252F
   LCDM0 = 0b00100001;
@@ -38,10 +41,10 @@ void LCD_init() {
 
 void char_to_digit(char character, char shape[2]) {
   /**
-   * Big map containing the binary sequences used to determine which LCD segments to
-   * light up for all the required characters
+   * Big map containing the binary sequences used to determine which LCD 
+   * segments to light up for all the required characters
    **/
-  if (character == '9' || character == '\t') { 
+  if (character == '9' || character == '\t') {
   // For convenience: int 9 == char '\t' so we can send ints as input
     shape[0] = 0b11110111;
     shape[1] = 0b00000000;
@@ -72,9 +75,8 @@ void char_to_digit(char character, char shape[2]) {
   } else if (character == '0' || character == '\0') {
     shape[0] = 0b11111100;
     shape[1] = 0b00101000;
-  }
+  } else if (character == 'M') {
   // and letters for days of week
-  else if (character == 'M') {
     shape[0] = 0b01101100;
     shape[1] = 0b10100000;
   } else if (character == 'T') {
@@ -107,9 +109,8 @@ void char_to_digit(char character, char shape[2]) {
   } else if (character == 'a') {
     shape[0] = 0b00011010;
     shape[1] = 0b00010000;
-  }
+  } else if (character == 'A') {
   // ALARM!
-  else if (character == 'A') {
     shape[0] = 0b11101111;
     shape[1] = 0b00000000;
   } else if (character == 'L') {
@@ -195,10 +196,14 @@ void show_digit(char character, char pos) {
    *  Input arguments: The character to display and a position
    *  indicating on which of the 6 14-seg displays to show it.
    **/
-  char shape[2] = {0,0}; // Pair of binary numbers to hold the pattern for the digit
-  char_to_digit(character, shape); // Fill out binary numbers with pattern for given digit
-  colons(shape, pos); // Add any colons or decimal points if required
-  set_digit(shape, pos); // Fill out the LCDM registers to display the digit
+  char shape[2] = {0, 0};
+  // Pair of binary numbers to hold the pattern for the digit
+  char_to_digit(character, shape);
+  // Fill out binary numbers with pattern for given digit
+  colons(shape, pos);
+  // Add any colons or decimal points if required
+  set_digit(shape, pos);
+  // Fill out the LCDM registers to display the digit
 }
 
 void blink_digit(char field) {

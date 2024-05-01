@@ -131,7 +131,7 @@ void timeset() {
                 selectedField = 1;  // Start off on left-most digits
             }
         } else if (alarmSetMode == 1) {
-	// Same as above, but the alarm only has two settable fields
+        // Same as above, but the alarm only has two settable fields
             if (ButtonAddress == START_BUTT && ButtonState == BUTT_PRESSED) {
                 alarm_update(selectedField % 2);
             } else if (ButtonAddress == LAP_BUTT && ButtonState == BUTT_PRESSED) {
@@ -215,11 +215,11 @@ void alarm_ring() {
         do {
             msg = receive(ProcessID);  // Get msg from mailbox
         } while ((msg == EMPTY) && (get_time() < sixtySeconds));
-	// Do nothing for 60 secs if there is no button press
-	// Any button press will cancel the alarm
+        // Do nothing for 60 secs if there is no button press
+        // Any button press will cancel the alarm
         if ((msg & 0xC) == LAP_BUTT) {
         // Lap button snoozes the alarm for 5 mins
-            alarmTime += (MINUTE * 5); // 5 minutes snooze
+            alarmTime += (MINUTE * 5);  // 5 minutes snooze
         }
     // regardless of how we got here, button or timeout, return to prev state
         alarmActive = 1;
@@ -285,7 +285,7 @@ void stopwatch() {
             }
         }
         if (ButtonAddress == MODE_BUTT) {
-            ButtonAddress = 0; // Clear message variables
+            ButtonAddress = 0;  // Clear message variables
             ButtonState = 0;
             stopwatchRunning = 0;
             STATE = CLOCK;
@@ -317,7 +317,7 @@ void update_LCD() {
             display_stopwatch();
         }
         if (STATE == CLOCK) {
-	// Clock has different views for setting alarm and checking date
+        // Clock has different views for setting alarm and checking date
             if (alarmSetMode == 1) {
                 display_alarm();
             } else if (monthMode == 1) {
@@ -349,7 +349,7 @@ void update_LCD() {
 		 * and repeats
 		 **/
             } else {
-		// Alarm mode only has two fields. Much simpler!
+                // Alarm mode only has two fields. Much simpler!
                 display_alarm();
                 blink_digit(selectedField % 2);
             }
