@@ -39,9 +39,9 @@ __interrupt void Port_1(void) {
 
     if ((P1IN & (1 << 2)) != (1 << 2)) {
     // here we can check if the button is up or down to determine the message
-        send(ProcessID, MODE_BUTT, BUTT_PRESSED);
+        send(ProcessID, START_BUTT, BUTT_PRESSED);
     } else {
-      // send(ProcessID, START_BUTT, BUTT_RELEASED);
+        send(ProcessID, START_BUTT, BUTT_RELEASED);
     }
 }
 
